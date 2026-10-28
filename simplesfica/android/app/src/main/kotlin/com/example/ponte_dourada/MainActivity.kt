@@ -1,5 +1,0 @@
-package com.example.ponte_dourada
-
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity : FlutterActivity()
