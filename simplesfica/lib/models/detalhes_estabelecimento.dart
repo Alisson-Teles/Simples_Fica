@@ -1,12 +1,6 @@
-
 import 'oferta.dart';
 
-enum TipoAtuacao {
-  semOfertas,
-  produtos,
-  servicos,
-  ambos,
-}
+enum TipoAtuacao { semOfertas, produtos, servicos, ambos }
 
 extension TipoAtuacaoDescricao on TipoAtuacao {
   String get rotulo {
@@ -21,6 +15,21 @@ extension TipoAtuacaoDescricao on TipoAtuacao {
         return 'Produtos e serviços';
     }
   }
+}
+
+// Regra única utilizada no catálogo público e no painel do comerciante.
+TipoAtuacao classificarOfertas(Iterable<Oferta> ofertas) {
+  final temProdutos = ofertas.any(
+        (oferta) => oferta.ativo && oferta.tipo == TipoOferta.produto,
+  );
+  final temServicos = ofertas.any(
+        (oferta) => oferta.ativo && oferta.tipo == TipoOferta.servico,
+  );
+
+  if (temProdutos && temServicos) return TipoAtuacao.ambos;
+  if (temProdutos) return TipoAtuacao.produtos;
+  if (temServicos) return TipoAtuacao.servicos;
+  return TipoAtuacao.semOfertas;
 }
 
 class Avaliacao {
@@ -50,36 +59,13 @@ class DetalhesEstabelecimento {
     required this.avaliacoes,
   });
 
-  List<Oferta> get produtosAtivos {
-    return ofertas.where((oferta) {
-      return oferta.ativo &&
-          oferta.tipo == TipoOferta.produto;
-    }).toList();
-  }
+  List<Oferta> get produtosAtivos => ofertas
+      .where((e) => e.ativo && e.tipo == TipoOferta.produto)
+      .toList();
 
-  List<Oferta> get servicosAtivos {
-    return ofertas.where((oferta) {
-      return oferta.ativo &&
-          oferta.tipo == TipoOferta.servico;
-    }).toList();
-  }
+  List<Oferta> get servicosAtivos => ofertas
+      .where((e) => e.ativo && e.tipo == TipoOferta.servico)
+      .toList();
 
-  TipoAtuacao get tipoAtuacao {
-    final temProdutos = produtosAtivos.isNotEmpty;
-    final temServicos = servicosAtivos.isNotEmpty;
-
-    if (temProdutos && temServicos) {
-      return TipoAtuacao.ambos;
-    }
-
-    if (temProdutos) {
-      return TipoAtuacao.produtos;
-    }
-
-    if (temServicos) {
-      return TipoAtuacao.servicos;
-    }
-
-    return TipoAtuacao.semOfertas;
-  }
+  TipoAtuacao get tipoAtuacao => classificarOfertas(ofertas);
 }

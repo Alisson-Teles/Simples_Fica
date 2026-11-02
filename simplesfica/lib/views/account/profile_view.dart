@@ -1,237 +1,95 @@
-
 import 'package:flutter/material.dart';
 
 import '../../state/app_scope.dart';
 import '../../theme/app_theme.dart';
-
 import '../auth/login_view.dart';
+import '../merchant/merchant_dashboard_view.dart';
 import 'edit_profile_view.dart';
 
 class ProfileView extends StatelessWidget {
   final VoidCallback onFavoritosPressed;
 
-  const ProfileView({
-    super.key,
-    required this.onFavoritosPressed,
-  });
+  const ProfileView({super.key, required this.onFavoritosPressed});
 
-  void _mostrarMensagem(
-      BuildContext context,
-      String mensagem,
-      ) {
+  void _mensagem(BuildContext context, String texto) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
+      SnackBar(content: Text(texto)),
     );
   }
 
-  Future<void> _editarPerfil(
-      BuildContext context,
-      ) async {
+  Future<void> _editarPerfil(BuildContext context) async {
     final sessao = AppScope.of(context);
-
     final salvo = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) => EditProfileView(
-          perfil: sessao.perfil,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => EditProfileView(perfil: sessao.perfil)),
     );
-
     if (!context.mounted) return;
-
     if (salvo == true) {
-      _mostrarMensagem(
-        context,
-        'Perfil atualizado nesta sessão de teste.',
-      );
+      _mensagem(context, 'Perfil atualizado somente nesta sessão.');
     }
   }
 
-  // NAVEGAÇÃO PARA LOGIN
-  void _abrirLogin(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const LoginView(),
-      ),
-    );
+  void _abrir(BuildContext context, Widget pagina) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => pagina));
   }
 
-  Widget _opcao({
-    required IconData icone,
-    required String titulo,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      color: Colors.white,
+  Widget _opcao(IconData icone, String titulo, VoidCallback abrir) {
+    return Card(color: Colors.white,
       margin: const EdgeInsets.only(bottom: 10),
-
       child: ListTile(
-        leading: Icon(
-          icone,
-          color: AppTheme.primary,
-        ),
-
+        leading: Icon(icone, color: AppTheme.primary),
         title: Text(titulo),
-
-        trailing: const Icon(
-          Icons.chevron_right,
-        ),
-
-        onTap: onTap,
+        trailing: const Icon(Icons.chevron_right),
+        onTap: abrir,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final sessao = AppScope.of(context);
-    final perfil = sessao.perfil;
-
+    final perfil = AppScope.of(context).perfil;
     return Scaffold(
       backgroundColor: AppTheme.background,
-
-      appBar: AppBar(
-        title: const Text(
-          'Meu perfil',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+      appBar: AppBar(title: const Text('Meu perfil'), automaticallyImplyLeading: false),
+      body: ListView(padding: const EdgeInsets.all(20), children: [
+        Card(color: Colors.white,
+          child: Padding(padding: const EdgeInsets.all(18),
+            child: Row(children: [
+              const CircleAvatar(radius: 30,
+                  backgroundColor: Color(0xFFF4E3D7),
+                  child: Icon(Icons.person, color: AppTheme.primary, size: 32)),
+              const SizedBox(width: 16),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(perfil.nome,
+                      style: const TextStyle(fontSize: 18,
+                          fontWeight: FontWeight.bold, color: AppTheme.brown)),
+                  Text(perfil.email, overflow: TextOverflow.ellipsis),
+                  const Text('Perfil demonstrativo',
+                      style: TextStyle(fontSize: 12, color: AppTheme.primary)),
+                ],
+              )),
+            ]),
           ),
         ),
-        automaticallyImplyLeading: false,
-      ),
-
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-
-        children: [
-          // CARTÃO DO USUÁRIO
-          Card(
-            color: Colors.white,
-
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundColor:
-                    Color(0xFFF4E3D7),
-
-                    child: Icon(
-                      Icons.person,
-                      color: AppTheme.primary,
-                      size: 32,
-                    ),
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
-                      children: [
-                        Text(
-                          perfil.nome,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.brown,
-                          ),
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        Text(
-                          perfil.email,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        const Text(
-                          'Perfil demonstrativo',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // DADOS PESSOAIS
-          _opcao(
-            icone: Icons.person_outline,
-            titulo: 'Dados pessoais',
-            onTap: () {
-              _editarPerfil(context);
-            },
-          ),
-
-          // FAVORITOS
-          _opcao(
-            icone: Icons.favorite_border,
-            titulo: 'Meus favoritos',
-            onTap: onFavoritosPressed,
-          ),
-
-          // LOGIN E CADASTRO
-          _opcao(
-            icone: Icons.login,
-            titulo: 'Entrar ou criar conta',
-            onTap: () {
-              _abrirLogin(context);
-            },
-          ),
-
-          // PAINEL DO COMERCIANTE
-          _opcao(
-            icone: Icons.storefront_outlined,
-            titulo: 'Meus negócios',
-            onTap: () {
-              _mostrarMensagem(
-                context,
-                'O painel do comerciante será '
-                    'desenvolvido na Etapa 5.',
-              );
-            },
-          ),
-
-          // CONFIGURAÇÕES
-          _opcao(
-            icone: Icons.settings_outlined,
-            titulo: 'Configurações',
-            onTap: () {
-              _mostrarMensagem(
-                context,
-                'Configurações serão '
-                    'implementadas na Etapa 7.',
-              );
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          const Text(
-            'Os dados desta tela são demonstrativos. '
-                'Nenhuma conta real está conectada.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF78645C),
-            ),
-          ),
-        ],
-      ),
+        const SizedBox(height: 24),
+        _opcao(Icons.person_outline, 'Dados pessoais',
+                () => _editarPerfil(context)),
+        _opcao(Icons.favorite_border, 'Meus favoritos', onFavoritosPressed),
+        _opcao(Icons.login, 'Entrar ou criar conta',
+                () => _abrir(context, const LoginView())),
+        _opcao(Icons.storefront_outlined, 'Meus negócios (demonstração)',
+                () => _abrir(context, const MerchantDashboardView())),
+        _opcao(Icons.settings_outlined, 'Configurações',
+                () => _mensagem(context, 'Configurações: Etapa 7.')),
+        const SizedBox(height: 20),
+        const Text(
+          'Modo de demonstração: o painel do comerciante é acessível '
+              'sem login real. Nenhuma permissão ou alteração no servidor é concedida.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Color(0xFF78645C)),
+        ),
+      ]),
     );
   }
 }
