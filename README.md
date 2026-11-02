@@ -10,7 +10,7 @@ O **Simples Fica** é um aplicativo mobile em desenvolvimento para aproximar pes
 
 - **Flutter e Dart** — desenvolvimento das interfaces mobile.
 - **Material Design 3** — componentes e tema visual.
-- **ChangeNotifier + InheritedNotifier** — compartilhamento de favoritos e perfil durante a sessão, sem dependências extras.
+- **ChangeNotifier + InheritedNotifier** — estado compartilhado de favoritos, perfil, negócios, catálogo e vendas durante a sessão, sem dependências extras.
 - **Flutter Test** — testes locais.
 - **Android Studio** — ambiente de desenvolvimento utilizado nesta fase.
 
@@ -26,12 +26,15 @@ O **Simples Fica** é um aplicativo mobile em desenvolvimento para aproximar pes
 - **Navegação inferior:** Início, Explorar, Favoritos e Perfil.
 - **Autenticação demonstrativa (Etapa 4):** telas de login, cadastro, escolha de tipo de conta e recuperação de senha com validações locais, **sem autenticar ou criar contas**.
 - **Entrada no fluxo:** Perfil → Entrar ou criar conta → Login → Cadastro/Recuperação; as quatro abas públicas continuam acessíveis sem login.
+- **Área do Comerciante (Etapa 5):** cadastro/edição de negócios, painel, catálogo de produtos e serviços, gestão de ofertas ativas e histórico de vendas em memória.
+- **Vendas demonstrativas:** validação de quantidade, preço e estoque; redução de estoque dos produtos e cálculo local de receita.
+- **Prévia, planos e anúncios:** visualização local do negócio, seleção visual de assinatura e prévia publicitária, sem publicação ou contratação.
 
 As telas e ações de demonstração **não representam operações reais de pagamento, avaliação publicada, envio de mensagens ou gravação em servidor**.
 
 ## Estrutura de diretórios
 
-A estrutura abaixo representa o projeto local esperado após a implementação da **Etapa 4**. Os arquivos dessa etapa devem ser publicados no GitHub no próximo commit:
+A estrutura abaixo representa o projeto **após a implementação local da Etapa 5**, prevista para publicação no commit correspondente. A presença do código na branch `main` deve ser confirmada após o `git push`:
 
 ```text
 Simples_Fica/
@@ -51,14 +54,18 @@ Simples_Fica/
 │   │
 │   ├── models/                      # Modelos e regras relacionadas aos dados
 │   │   ├── estabelecimento.dart
-│   │   ├── oferta.dart
-│   │   ├── detalhes_estabelecimento.dart
+│   │   ├── oferta.dart                   # Preços, estoque, SKU, ativo/destaque
+│   │   ├── detalhes_estabelecimento.dart # Classificação de ofertas
+│   │   ├── negocio_demo.dart            # Negócio e venda de teste
 │   │   ├── usuario_perfil.dart
 │   │   └── tipo_conta.dart              # Cliente ou comerciante no fluxo de cadastro
 │   │
 │   ├── state/                       # Estado compartilhado durante a sessão
-│   │   ├── app_session.dart         # Favoritos e perfil em memória
+│   │   ├── app_session.dart         # Favoritos, perfil, negócios, ofertas e vendas locais
 │   │   └── app_scope.dart           # Disponibiliza o estado para as views
+│   │
+│   ├── utils/
+│   │   └── formatacao.dart          # Moeda e data no protótipo
 │   │
 │   ├── theme/
 │   │   └── app_theme.dart          # Paleta de cores e tema Material
@@ -75,20 +82,31 @@ Simples_Fica/
 │   │   │   ├── favorites_view.dart
 │   │   │   ├── profile_view.dart         # Acesso às novas views de autenticação
 │   │   │   └── edit_profile_view.dart
-│   │   └── auth/                        # Interfaces de login e cadastro (Etapa 4)
-│   │       ├── login_view.dart
-│   │       ├── account_type_view.dart
-│   │       ├── register_view.dart
-│   │       └── forgot_password_view.dart
+│   │   ├── auth/                        # Interfaces de login e cadastro (Etapa 4)
+│   │   │   ├── login_view.dart
+│   │   │   ├── account_type_view.dart
+│   │   │   ├── register_view.dart
+│   │   │   └── forgot_password_view.dart
+│   │   └── merchant/                    # Área do Comerciante (Etapa 5)
+│   │       ├── merchant_dashboard_view.dart
+│   │       ├── business_registration_view.dart
+│   │       ├── edit_business_view.dart
+│   │       ├── business_preview_view.dart
+│   │       ├── offerings_view.dart
+│   │       ├── offering_form_view.dart
+│   │       ├── sales_view.dart
+│   │       ├── subscription_view.dart
+│   │       └── advertising_view.dart
 │   │
 │   └── widgets/                     # Componentes reutilizáveis
 │       └── business/
 │           └── estabelecimento_card.dart
 │
 ├── test/
-│   └── widget_test.dart            # Testes do AppSession
+│   ├── widget_test.dart            # Testes do AppSession
+│   └── merchant_state_test.dart     # Testes da Etapa 5
 ├── docs/                          # Registros técnicos de entregas
-│   └── SIMPLES_FICA_Commit_Etapa_4.md
+│   └── SIMPLES_FICA_Commit_Etapa_5.md
 ├── pubspec.yaml                    # Dependências e configuração Flutter
 ├── pubspec.lock                    # Versões resolvidas das dependências
 ├── analysis_options.yaml          # Regras de análise do Dart
@@ -103,12 +121,14 @@ Simples_Fica/
 | --- | --- |
 | `lib/data/` | Dados demonstrativos temporários. |
 | `lib/models/` | Estruturas e regras dos dados; serão adaptadas para receber respostas da API. |
-| `lib/state/` | Estado compartilhado de favoritos e perfil durante a sessão atual. |
+| `lib/state/` | Favoritos, perfil, negócios, catálogos, vendas e prévias em memória. |
+| `lib/utils/` | Formatação demonstrativa de moeda e data. |
 | `lib/theme/` | Configuração visual reutilizada por todo o app. |
 | `lib/views/core/` | Abertura do aplicativo e navegação principal. |
 | `lib/views/public/` | Descoberta de negócios e detalhes públicos. |
 | `lib/views/account/` | Favoritos e perfil demonstrativo; ponto de entrada do login. |
 | `lib/views/auth/` | Formulários de autenticação, tipo de conta, cadastro e recuperação (somente interface). |
+| `lib/views/merchant/` | Painel de negócios, cadastro/edição, ofertas, vendas e telas demonstrativas de assinatura e anúncios. |
 | `lib/widgets/business/` | Componentes visuais reutilizáveis de estabelecimentos. |
 | `test/` | Testes automatizados. |
 
@@ -133,6 +153,29 @@ A classificação pública é calculada a partir do **catálogo de ofertas ativa
 ### Favoritos e perfil
 
 `AppSession` controla os IDs de estabelecimentos favoritos e os dados do perfil demonstrativo. `AppScope` disponibiliza a mesma instância para as views. As alterações são refletidas na sessão atual, **sem persistência após o encerramento do aplicativo**.
+
+### Área do Comerciante: catálogo e vendas locais (Etapa 5)
+
+- O painel é acessível em **Perfil → Meus negócios (demonstração)** sem login real e não concede nenhuma permissão de produção.
+- `NegocioDemo` mantém as ofertas do estabelecimento; o estado compartilhado gerencia negócios, ofertas e vendas durante a sessão.
+- A regra `classificarOfertas()` continua calculando a classificação a partir das **ofertas ativas**, independentemente do estoque.
+- Um produto exige preço positivo e estoque não negativo no cadastro. Serviços podem não ter preço indicado.
+- O registro de venda aceita ofertas ativas com preço positivo e quantidade maior que zero. Produtos precisam de estoque disponível; uma venda reduz esse estoque.
+- `receitaDemo()` soma os registros de vendas locais. Não representa pagamento, recebimento ou faturamento real.
+- A prévia pública e a publicidade não são publicadas na Home/Explorar; selecionar planos não contrata assinaturas.
+- Excluir um negócio remove seus registros de vendas e prévias demonstrativas associados.
+
+Exemplo: produto com estoque de 5 unidades e preço de R$ 15,00. Venda de 2 unidades → estoque de 3 unidades e total registrado de R$ 30,00. Uma tentativa de vender 4 unidades adicionais deve ser rejeitada.
+
+```text
+Perfil → Meus negócios (demonstração) → Painel do Comerciante
+                                         ├── Cadastrar / editar negócio
+                                         ├── Produtos e serviços
+                                         ├── Vendas demonstrativas
+                                         ├── Prévia pública local
+                                         ├── Assinatura demonstrativa
+                                         └── Prévia de anúncios
+```
 
 ### Tipo de conta e tipo de atuação: conceitos diferentes
 
@@ -174,6 +217,7 @@ flutter run
 ```bash
 flutter analyze
 flutter test
+flutter test test/merchant_state_test.dart
 ```
 
 > O repositório ainda utiliza o nome interno `git` no campo `name` do `pubspec.yaml`. Esse identificador poderá ser renomeado em uma etapa específica, com atualização das referências afetadas.
@@ -185,8 +229,8 @@ flutter test
 | 0–1 | Tema, Splash, Home, Explorar e navegação inicial | Implementado |
 | 2 | Detalhes, catálogo e classificação automática | Concluído |
 | 3 | Favoritos, Perfil e navegação com quatro abas | Implementado em código |
-| 4 | Login, cadastro, tipo de conta e recuperação de senha (apenas UI) | Implementado localmente; validação manual em andamento |
-| 5 | Cadastro e painel do comerciante | Planejado |
+| 4 | Login, cadastro, tipo de conta e recuperação de senha (apenas UI) | Implementado em código; não autenticado |
+| 5 | Cadastro, painel, catálogo, vendas, prévias, assinatura e anúncios (modo demo) | Implementado localmente; testes e publicação a confirmar |
 | 6 | Administração geral | Planejado |
 | 7 | Ajuda, configurações e telas auxiliares | Planejado |
 | 8 | Revisão de navegação, acessibilidade e testes | Planejado |
@@ -200,9 +244,20 @@ Os arquivos abaixo **são fontes temporárias de dados** e deverão deixar de se
 - `lib/data/estabelecimentos_mock.dart` — estabelecimentos demonstrativos.
 - `lib/data/detalhes_mock.dart` — ofertas, horários, endereços e avaliações demonstrativas.
 
-Os modelos, views e widgets devem ser preservados e adaptados para consumir esses dados por meio de uma camada de serviços/repositórios. `lib/state/app_session.dart` também precisará de integração com autenticação e persistência de favoritos/perfil. A camada de autenticação futura deverá integrar os formulários `lib/views/auth/` a serviços próprios, sem armazenar senhas ou segredos no aplicativo.
+Os modelos, views e widgets devem ser preservados e adaptados para consumir esses dados por meio de uma camada de serviços/repositórios. `lib/state/app_session.dart` também precisará de integração com autenticação e persistência de favoritos, perfil, negócios, ofertas e vendas. A camada de autenticação futura deverá integrar os formulários `lib/views/auth/` a serviços próprios, sem armazenar senhas ou segredos no aplicativo.
 
 **Não conectar o aplicativo Flutter diretamente ao SQL Server.** A comunicação futura deverá passar por uma API com validação e autorização no servidor.
+
+### Pontos de integração da Etapa 5
+
+| Camada atual | Evolução futura |
+| --- | --- |
+| `lib/models/negocio_demo.dart` | Modelo persistente de negócios e vendas, com identificadores atribuídos pelo servidor. |
+| `lib/state/app_session.dart` | Repositórios e serviços para CRUD de negócios, ofertas, vendas e sessão autenticada. |
+| `lib/views/merchant/business_registration_view.dart` e `edit_business_view.dart` | Cadastro e edição autorizados pelo backend. |
+| `lib/views/merchant/offering_form_view.dart` e `offerings_view.dart` | Catálogo persistente, validações server-side e tratamento de erros. |
+| `lib/views/merchant/sales_view.dart` | Registro de vendas com atomicidade para reserva/baixa de estoque. |
+| `lib/views/merchant/subscription_view.dart` e `advertising_view.dart` | Planos, contratação, cobrança, aprovação e estado real de anúncios. |
 
 ## Limitações atuais
 
@@ -210,7 +265,11 @@ Os modelos, views e widgets devem ser preservados e adaptados para consumir esse
 - Favoritos e perfil são mantidos somente em memória.
 - Não há autenticação ou autorização reais de usuários; os formulários de login/cadastro são demonstrativos.
 - Não há consulta ao banco de dados ou integração com API.
+- Negócios criados na área do comerciante permanecem locais; não entram no catálogo público.
+- Vendas, receitas, assinaturas e anúncios são demonstrativos, sem processamento financeiro.
+- Não há login de comerciante nem autorização real de acesso ao painel.
 - Ações de WhatsApp, telefone, rota, avaliações e cadastro podem ser apenas demonstrativas.
+
 
 ## Repositório
 
