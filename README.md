@@ -212,10 +212,6 @@ Os modelos, views e widgets devem ser preservados e adaptados para consumir esse
 - Não há consulta ao banco de dados ou integração com API.
 - Ações de WhatsApp, telefone, rota, avaliações e cadastro podem ser apenas demonstrativas.
 
-## Documentação de commits
-
-O registro técnico da etapa atual deve ser colocado em `docs/SIMPLES_FICA_Commit_Etapa_4.md`. Nele estão as regras de validação, o inventário de arquivos, os limites das ações demonstrativas e os pontos futuros de integração com a API.
-
 ## Repositório
 
 [GitHub — Alisson-Teles/Simples_Fica](https://github.com/Alisson-Teles/Simples_Fica)
