@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'state/app_session.dart';
 import 'state/app_scope.dart';
+
 import 'views/core/splash_view.dart';
+import 'views/info/not_found_view.dart';
 
 void main() {
   runApp(const SimplesFicaApp());
@@ -18,7 +20,8 @@ class SimplesFicaApp extends StatefulWidget {
       _SimplesFicaAppState();
 }
 
-class _SimplesFicaAppState extends State<SimplesFicaApp> {
+class _SimplesFicaAppState
+    extends State<SimplesFicaApp> {
   final AppSession _sessao = AppSession();
 
   @override
@@ -36,6 +39,14 @@ class _SimplesFicaAppState extends State<SimplesFicaApp> {
         title: 'Simples Fica',
         theme: AppTheme.lightTheme,
         home: const SplashView(),
+
+        // ETAPA 7: destino não reconhecido.
+        onUnknownRoute: (settings) {
+          return MaterialPageRoute<void>(
+            settings: settings,
+            builder: (_) => const NotFoundView(),
+          );
+        },
       ),
     );
   }

@@ -195,3 +195,5 @@ Verificações manuais importantes:
 A edição de `AppSession` e a seleção de Admin são suficientes para testar navegação local, mas não são autorização segura. Um usuário malicioso poderia modificar um app Flutter; o backend deverá aplicar permissões, vínculos de propriedade, políticas de publicação, suspensão e elegibilidade de anúncios em **cada operação**. Não existem pagamentos, cobranças, moderação ou auditoria reais. O armazenamento local em memória não sobrevive a reinício nem sincroniza celulares.
 
 **Integração futura:** Flutter → API .NET → SQL Server, com autenticação segura e persistência; não conectar o Flutter diretamente ao banco nem colocar senhas de produção no código.
+
+Documentação do commit: [`docs/SIMPLES_FICA_Commit_Etapa_6.md`](docs/SIMPLES_FICA_Commit_Etapa_6.md).

@@ -7,6 +7,8 @@ import '../../models/oferta.dart';
 import '../../state/app_scope.dart';
 import '../../theme/app_theme.dart';
 
+import '../info/not_found_view.dart';
+
 class BusinessDetailView extends StatefulWidget {
   final Estabelecimento estabelecimento;
 
@@ -24,7 +26,9 @@ class _BusinessDetailViewState
     extends State<BusinessDetailView> {
   int _nota = 5;
 
-  final _comentarioController = TextEditingController();
+  final TextEditingController _comentarioController =
+  TextEditingController();
+
   final List<Avaliacao> _avaliacoesLocais = [];
 
   @override
@@ -33,26 +37,37 @@ class _BusinessDetailViewState
     super.dispose();
   }
 
-  void _mensagem(String texto) {
+  void _mostrarMensagem(String texto) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texto)),
+      SnackBar(
+        content: Text(texto),
+      ),
     );
   }
+
+  // ======================================
+  // AVALIAÇÃO DEMONSTRATIVA
+  // ======================================
 
   void _publicarAvaliacao() {
     final sessao = AppScope.of(context);
 
-    if (!sessao.negocioDisponivelPublicamente(
-      widget.estabelecimento.id,
-    )) {
-      _mensagem('Estabelecimento indisponível.');
+    final id = widget.estabelecimento.id;
+
+    if (!sessao.negocioDisponivelPublicamente(id)) {
+      _mostrarMensagem(
+        'Estabelecimento indisponível.',
+      );
       return;
     }
 
-    final comentario = _comentarioController.text.trim();
+    final comentario =
+    _comentarioController.text.trim();
 
     if (comentario.isEmpty) {
-      _mensagem('Digite um comentário.');
+      _mostrarMensagem(
+        'Digite um comentário.',
+      );
       return;
     }
 
@@ -65,39 +80,63 @@ class _BusinessDetailViewState
           comentario: comentario,
         ),
       );
+
       _comentarioController.clear();
     });
 
-    _mensagem(
+    _mostrarMensagem(
       'Avaliação adicionada nesta demonstração.',
     );
   }
 
-  String _preco(double? valor) {
-    if (valor == null) return 'Consultar valor';
+  // ======================================
+  // FORMATAÇÃO DO PREÇO
+  // ======================================
 
-    return 'R\$ ${valor.toStringAsFixed(2).replaceAll('.', ',')}';
+  String _formatarPreco(double? valor) {
+    if (valor == null) {
+      return 'Consultar valor';
+    }
+
+    final numero = valor
+        .toStringAsFixed(2)
+        .replaceAll('.', ',');
+
+    return 'R\$ $numero';
   }
 
-  Widget _secao(String titulo, List<Widget> conteudo) {
+  // ======================================
+  // COMPONENTE DE SEÇÃO
+  // ======================================
+
+  Widget _secao(
+      String titulo,
+      List<Widget> conteudo,
+      ) {
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.only(bottom: 18),
+
       child: Padding(
         padding: const EdgeInsets.all(18),
+
         child: Column(
           crossAxisAlignment:
           CrossAxisAlignment.start,
+
           children: [
             Text(
               titulo,
+
               style: const TextStyle(
                 color: AppTheme.brown,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 14),
+
             ...conteudo,
           ],
         ),
@@ -105,35 +144,48 @@ class _BusinessDetailViewState
     );
   }
 
+  // ======================================
+  // COMPONENTE DE PRODUTO OU SERVIÇO
+  // ======================================
+
   Widget _cartaoOferta(Oferta oferta) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
+
       decoration: BoxDecoration(
         color: AppTheme.background,
         borderRadius: BorderRadius.circular(12),
       ),
+
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           Text(
             oferta.nome,
+
             style: const TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 6),
+
           Text(oferta.descricao),
+
           const SizedBox(height: 8),
+
           Text(
-            _preco(oferta.preco),
+            _formatarPreco(oferta.preco),
+
             style: const TextStyle(
               color: AppTheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
+
           if (oferta.tipo == TipoOferta.produto &&
               oferta.estoque != null)
             Text(
@@ -146,95 +198,85 @@ class _BusinessDetailViewState
     );
   }
 
+  // ======================================
+  // TELA
+  // ======================================
+
   @override
   Widget build(BuildContext context) {
     final sessao = AppScope.of(context);
 
     final id = widget.estabelecimento.id;
+
     final disponivel =
     sessao.negocioDisponivelPublicamente(id);
 
     final estabelecimento =
     sessao.estabelecimentoPorId(id);
 
+    // ETAPA 7:
+    // Uma única tela padronizada para negócios
+    // suspensos, inativos ou não publicados.
     if (!disponivel || estabelecimento == null) {
-      return Scaffold(
-        backgroundColor: AppTheme.background,
-        appBar: AppBar(
-          title: const Text('Estabelecimento'),
-        ),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.store_mall_directory_outlined,
-                  size: 60,
-                  color: AppTheme.primary,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Estabelecimento indisponível',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Este estabelecimento não está '
-                      'disponível para consulta pública '
-                      'no momento.',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
+      return const NotFoundView(
+        titulo: 'Estabelecimento indisponível',
+        mensagem:
+        'Este negócio não está disponível '
+            'para consulta pública no momento. '
+            'Você pode voltar aos resultados '
+            'ou acessar o início do aplicativo.',
       );
     }
 
     final detalhes = sessao.detalhesPorId(id);
+
     final favorito = sessao.isFavorite(id);
-    final local = sessao.ehNegocioLocal(id);
+
+    final negocioLocal = sessao.ehNegocioLocal(id);
 
     final produtos =
         detalhes?.produtosAtivos ?? <Oferta>[];
+
     final servicos =
         detalhes?.servicosAtivos ?? <Oferta>[];
 
-    final avaliacoes = [
+    final avaliacoes = <Avaliacao>[
       ..._avaliacoesLocais,
       ...?detalhes?.avaliacoes,
     ];
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+
       appBar: AppBar(
         title: const Text('Estabelecimento'),
+
         actions: [
           IconButton(
             tooltip: favorito
                 ? 'Remover dos favoritos'
                 : 'Adicionar aos favoritos',
+
             icon: Icon(
               favorito
                   ? Icons.favorite
                   : Icons.favorite_border,
+
               color: AppTheme.primary,
             ),
+
             onPressed: () {
               sessao.toggleFavorite(id);
             },
           ),
         ],
       ),
+
       body: ListView(
         children: [
           Container(
             height: 150,
+
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -243,33 +285,41 @@ class _BusinessDetailViewState
                 ],
               ),
             ),
+
             child: const Icon(
               Icons.storefront,
               size: 72,
               color: AppTheme.brown,
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(20),
+
             child: Column(
               crossAxisAlignment:
               CrossAxisAlignment.start,
+
               children: [
                 Wrap(
                   spacing: 8,
+                  runSpacing: 6,
+
                   children: [
                     Chip(
                       label: Text(
                         estabelecimento.categoria,
                       ),
                     ),
+
                     Chip(
                       label: Text(
                         detalhes?.tipoAtuacao.rotulo ??
                             'Sem ofertas',
                       ),
                     ),
-                    if (!local)
+
+                    if (!negocioLocal)
                       Chip(
                         label: Text(
                           estabelecimento.aberto
@@ -279,127 +329,190 @@ class _BusinessDetailViewState
                       ),
                   ],
                 ),
+
                 const SizedBox(height: 14),
+
                 Text(
                   estabelecimento.nome,
+
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.brown,
                   ),
                 ),
+
                 const SizedBox(height: 6),
+
                 Text(
                   '${estabelecimento.bairro}, '
                       '${estabelecimento.cidade} - '
                       '${detalhes?.uf ?? 'GO'}',
                 ),
+
                 const SizedBox(height: 12),
-                if (!local)
+
+                if (!negocioLocal)
                   Text(
                     'Avaliação: '
                         '${estabelecimento.avaliacao.toStringAsFixed(1)} '
-                        '(${estabelecimento.totalAvaliacoes} avaliações demo)',
+                        '(${estabelecimento.totalAvaliacoes} '
+                        'avaliações demo)',
                   )
                 else
                   const Text(
                     'Ainda sem avaliações públicas.',
                   ),
+
                 const SizedBox(height: 18),
+
+                // AÇÕES DE CONTATO
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
+
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () => _mensagem(
-                        'WhatsApp será integrado futuramente.',
-                      ),
+                      onPressed: () {
+                        _mostrarMensagem(
+                          'WhatsApp será integrado '
+                              'futuramente.',
+                        );
+                      },
+
                       icon: const Icon(Icons.chat),
                       label: const Text('WhatsApp'),
                     ),
+
                     OutlinedButton.icon(
-                      onPressed: () => _mensagem(
-                        'Telefone: ${estabelecimento.telefone}',
-                      ),
+                      onPressed: () {
+                        _mostrarMensagem(
+                          'Telefone: '
+                              '${estabelecimento.telefone}',
+                        );
+                      },
+
                       icon: const Icon(Icons.phone),
                       label: const Text('Ligar'),
                     ),
+
                     OutlinedButton.icon(
-                      onPressed: () => _mensagem(
-                        'Mapas serão integrados futuramente.',
-                      ),
+                      onPressed: () {
+                        _mostrarMensagem(
+                          'Mapas serão integrados '
+                              'futuramente.',
+                        );
+                      },
+
                       icon: const Icon(Icons.directions),
                       label: const Text('Rota'),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 22),
+
+                // SOBRE O NEGÓCIO
                 _secao(
                   'Sobre este negócio',
-                  [Text(estabelecimento.descricao)],
+                  [
+                    Text(estabelecimento.descricao),
+                  ],
                 ),
+
+                // PRODUTOS
                 if (produtos.isNotEmpty)
                   _secao(
                     'Produtos disponíveis',
                     produtos.map(_cartaoOferta).toList(),
                   ),
+
+                // SERVIÇOS
                 if (servicos.isNotEmpty)
                   _secao(
                     'Serviços e valores',
                     servicos.map(_cartaoOferta).toList(),
                   ),
+
+                // AVALIAÇÕES
                 _secao(
                   'Avaliações (demonstração)',
                   [
                     const Text('Sua nota:'),
+
                     Wrap(
-                      children: List.generate(5, (index) {
-                        final nota = index + 1;
-                        return IconButton(
-                          tooltip: '$nota estrelas',
-                          onPressed: () {
-                            setState(() => _nota = nota);
-                          },
-                          icon: Icon(
-                            nota <= _nota
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: Colors.amber,
-                          ),
-                        );
-                      }),
+                      children: List.generate(
+                        5,
+                            (index) {
+                          final nota = index + 1;
+
+                          return IconButton(
+                            tooltip: '$nota estrelas',
+
+                            onPressed: () {
+                              setState(() {
+                                _nota = nota;
+                              });
+                            },
+
+                            icon: Icon(
+                              nota <= _nota
+                                  ? Icons.star
+                                  : Icons.star_border,
+
+                              color: Colors.amber,
+                            ),
+                          );
+                        },
+                      ),
                     ),
+
                     TextField(
                       controller: _comentarioController,
                       maxLines: 3,
                       maxLength: 600,
+
                       decoration: const InputDecoration(
-                        hintText: 'Escreva um comentário...',
+                        hintText:
+                        'Escreva um comentário...',
                         border: OutlineInputBorder(),
                       ),
                     ),
+
                     const SizedBox(height: 12),
+
                     ElevatedButton(
                       onPressed: _publicarAvaliacao,
+
                       child: const Text(
                         'Publicar avaliação (teste)',
                       ),
                     ),
+
                     const Divider(height: 28),
+
                     if (avaliacoes.isEmpty)
                       const Text(
                         'Nenhum comentário demonstrativo.',
                       )
                     else
                       ...avaliacoes.map(
-                            (a) => ListTile(
-                          title: Text(a.autor),
-                          subtitle: Text(a.comentario),
-                          trailing: Text('${a.nota} ★'),
+                            (avaliacao) => ListTile(
+                          title: Text(avaliacao.autor),
+
+                          subtitle: Text(
+                            avaliacao.comentario,
+                          ),
+
+                          trailing: Text(
+                            '${avaliacao.nota} ★',
+                          ),
                         ),
                       ),
                   ],
                 ),
+
+                // ENDEREÇO E HORÁRIOS
                 _secao(
                   'Endereço e horário',
                   [
@@ -408,15 +521,22 @@ class _BusinessDetailViewState
                           '${estabelecimento.bairro}, '
                           '${estabelecimento.cidade}',
                     ),
+
                     const SizedBox(height: 8),
-                    Text(estabelecimento.telefone),
+
+                    Text(
+                      estabelecimento.telefone,
+                    ),
+
                     const Divider(),
+
                     ...?detalhes?.horarios.map(
-                          (h) => Padding(
+                          (horario) => Padding(
                         padding: const EdgeInsets.only(
                           bottom: 6,
                         ),
-                        child: Text(h),
+
+                        child: Text(horario),
                       ),
                     ),
                   ],
