@@ -1,221 +1,197 @@
-# SIMPLES FICA
+# Simples Fica — Flutter / Dart
 
 **O que fica perto, fica fácil.**
 
-O **Simples Fica** é um aplicativo mobile em desenvolvimento para aproximar pessoas de estabelecimentos comerciais e prestadores de serviços da sua região. O objetivo é facilitar a descoberta de negócios, a consulta de produtos e serviços e o contato com quem os oferece.
+Esta pasta contém o aplicativo mobile do Simples Fica. Consulte também o [README principal](../README.md). Este documento descreve o **estado-alvo da Etapa 6 consolidada**, incluindo a integração das regras administrativas com Home, Explorar e o painel do Comerciante. Os arquivos precisam estar no projeto local e passar em compilação/testes antes do commit.
 
-> **Estado atual:** protótipo de interfaces em **Flutter/Dart**, com dados demonstrativos e gerenciamento de estado em memória. **Ainda não há backend, API, SQL Server ou autenticação real integrados.**
+> **Modo demo:** todos os dados são fictícios e mantidos em memória. A estrutura .NET em `../backsimplesfica/` ainda não está integrada. Não existem contas reais, permissões seguras ou operações financeiras reais.
 
-## Tecnologias
-
-- **Flutter e Dart** — desenvolvimento das interfaces mobile.
-- **Material Design 3** — componentes e tema visual.
-- **ChangeNotifier + InheritedNotifier** — compartilhamento de favoritos e perfil durante a sessão, sem dependências extras.
-- **Flutter Test** — testes locais.
-- **Android Studio** — ambiente de desenvolvimento utilizado nesta fase.
-
-## Funcionalidades implementadas em código
-
-- **Splash:** apresentação inicial e navegação automática para a Home.
-- **Home:** destaques patrocinados separados dos resultados orgânicos e cartões de estabelecimentos.
-- **Explorar:** pesquisa, categoria, cidade, avaliação, situação de funcionamento, ordenação e filtro por tipo de estabelecimento.
-- **Detalhes do estabelecimento:** dados públicos, catálogo, endereço, horários e avaliações demonstrativas.
-- **Classificação automática:** comerciante, prestador de serviços ou ambos, com base nas **ofertas ativas** cadastradas.
-- **Favoritos:** inclusão e remoção com estado compartilhado entre as telas durante a sessão.
-- **Perfil:** exibição e edição de nome, e-mail e telefone com validações locais.
-- **Navegação inferior:** Início, Explorar, Favoritos e Perfil.
-- **Autenticação demonstrativa (Etapa 4):** telas de login, cadastro, escolha de tipo de conta e recuperação de senha com validações locais, **sem autenticar ou criar contas**.
-- **Entrada no fluxo:** Perfil → Entrar ou criar conta → Login → Cadastro/Recuperação; as quatro abas públicas continuam acessíveis sem login.
-
-As telas e ações de demonstração **não representam operações reais de pagamento, avaliação publicada, envio de mensagens ou gravação em servidor**.
-
-## Estrutura de diretórios
-
-A estrutura abaixo representa o projeto local esperado após a implementação da **Etapa 4**. Os arquivos dessa etapa devem ser publicados no GitHub no próximo commit:
-
-```text
-Simples_Fica/
-├── android/                         # Configurações do aplicativo Android
-├── ios/                             # Projeto nativo iOS
-├── linux/                           # Suporte à compilação para Linux
-├── macos/                           # Suporte à compilação para macOS
-├── web/                             # Suporte à compilação web
-├── windows/                         # Suporte à compilação para Windows
-│
-├── lib/                             # Código-fonte Flutter/Dart
-│   ├── main.dart                    # Inicialização e injeção do AppSession
-│   │
-│   ├── data/                        # Dados fictícios (substituíveis pela API)
-│   │   ├── estabelecimentos_mock.dart
-│   │   └── detalhes_mock.dart
-│   │
-│   ├── models/                      # Modelos e regras relacionadas aos dados
-│   │   ├── estabelecimento.dart
-│   │   ├── oferta.dart
-│   │   ├── detalhes_estabelecimento.dart
-│   │   ├── usuario_perfil.dart
-│   │   └── tipo_conta.dart              # Cliente ou comerciante no fluxo de cadastro
-│   │
-│   ├── state/                       # Estado compartilhado durante a sessão
-│   │   ├── app_session.dart         # Favoritos e perfil em memória
-│   │   └── app_scope.dart           # Disponibiliza o estado para as views
-│   │
-│   ├── theme/
-│   │   └── app_theme.dart          # Paleta de cores e tema Material
-│   │
-│   ├── views/                       # Telas do aplicativo
-│   │   ├── core/
-│   │   │   ├── splash_view.dart
-│   │   │   └── main_navigation_view.dart
-│   │   ├── public/
-│   │   │   ├── home_view.dart
-│   │   │   ├── explore_view.dart
-│   │   │   └── business_detail_view.dart
-│   │   ├── account/
-│   │   │   ├── favorites_view.dart
-│   │   │   ├── profile_view.dart         # Acesso às novas views de autenticação
-│   │   │   └── edit_profile_view.dart
-│   │   └── auth/                        # Interfaces de login e cadastro (Etapa 4)
-│   │       ├── login_view.dart
-│   │       ├── account_type_view.dart
-│   │       ├── register_view.dart
-│   │       └── forgot_password_view.dart
-│   │
-│   └── widgets/                     # Componentes reutilizáveis
-│       └── business/
-│           └── estabelecimento_card.dart
-│
-├── test/
-│   └── widget_test.dart            # Testes do AppSession
-├── docs/                          # Registros técnicos de entregas
-│   └── SIMPLES_FICA_Commit_Etapa_4.md
-├── pubspec.yaml                    # Dependências e configuração Flutter
-├── pubspec.lock                    # Versões resolvidas das dependências
-├── analysis_options.yaml          # Regras de análise do Dart
-├── .metadata                      # Metadados do Flutter
-├── .gitignore                     # Arquivos que não entram no Git
-└── README.md                      # Este documento
-```
-
-### Responsabilidades dos diretórios
-
-| Diretório | Responsabilidade |
-| --- | --- |
-| `lib/data/` | Dados demonstrativos temporários. |
-| `lib/models/` | Estruturas e regras dos dados; serão adaptadas para receber respostas da API. |
-| `lib/state/` | Estado compartilhado de favoritos e perfil durante a sessão atual. |
-| `lib/theme/` | Configuração visual reutilizada por todo o app. |
-| `lib/views/core/` | Abertura do aplicativo e navegação principal. |
-| `lib/views/public/` | Descoberta de negócios e detalhes públicos. |
-| `lib/views/account/` | Favoritos e perfil demonstrativo; ponto de entrada do login. |
-| `lib/views/auth/` | Formulários de autenticação, tipo de conta, cadastro e recuperação (somente interface). |
-| `lib/widgets/business/` | Componentes visuais reutilizáveis de estabelecimentos. |
-| `test/` | Testes automatizados. |
-
-## Regras de negócio principais
-
-### Classificação automática dos estabelecimentos
-
-A classificação pública é calculada a partir do **catálogo de ofertas ativas**:
-
-| Ofertas ativas | Tipo apresentado |
-| --- | --- |
-| Somente produtos | Comerciante |
-| Somente serviços | Prestador de serviços |
-| Produtos e serviços | Produtos e serviços |
-| Nenhuma | Sem ofertas |
-
-- Regra central: `lib/models/detalhes_estabelecimento.dart`.
-- Tipo de cada oferta: `lib/models/oferta.dart`.
-- Aplicação nos filtros: `lib/views/public/explore_view.dart`.
-- Exibição condicional de seções: `lib/views/public/business_detail_view.dart`.
-
-### Favoritos e perfil
-
-`AppSession` controla os IDs de estabelecimentos favoritos e os dados do perfil demonstrativo. `AppScope` disponibiliza a mesma instância para as views. As alterações são refletidas na sessão atual, **sem persistência após o encerramento do aplicativo**.
-
-### Tipo de conta e tipo de atuação: conceitos diferentes
-
-- `lib/models/tipo_conta.dart`: distingue **Cliente** e **Comerciante** durante a escolha do cadastro.
-- `lib/models/detalhes_estabelecimento.dart`: calcula se um **estabelecimento** atua com produtos, serviços ou ambos, de acordo com ofertas ativas.
-- O tipo de conta **não** concede permissões reais nesta fase. No futuro, regras administrativas deverão ser autorizadas pelo backend.
-
-### Login e cadastro demonstrativos (Etapa 4)
-
-As interfaces de autenticação incluem validações locais de formato de e-mail, nome, telefone, senha e confirmação de senha. O login apresenta estado de carregamento simulado; a recuperação de senha somente valida o formato do e-mail. Todos os fluxos sinalizam que **nenhum login, cadastro ou e-mail foi realizado**.
-
-```text
-Perfil → Entrar ou criar conta → Login
-                                 ├── Criar conta → Tipo de conta → Cadastro
-                                 └── Esqueci a senha → Recuperação de senha
-```
-
-**Não utilize senhas reais nos testes.** O app não possui usuários cadastrados ou autenticação real. A Splash continua abrindo as quatro abas públicas; a tela de login é acessada pelo Perfil. O acesso demonstrativo por tipo de usuário e a abertura automática do login após a Splash são ideias para uma implementação posterior, **não estão prontas**.
-
-## Como executar
-
-### Pré-requisitos
-
-- Flutter SDK compatível com `pubspec.yaml`.
-- Android Studio ou VS Code com suporte a Flutter/Dart.
-- Emulador Android configurado ou celular conectado para execução mobile.
-
-### Passos
+## Inicialização
 
 ```bash
-git clone https://github.com/Alisson-Teles/Simples_Fica.git
-cd Simples_Fica
+cd simplesfica  # caso esteja na raiz do repositório
 flutter pub get
+flutter analyze
+flutter test
 flutter run
 ```
 
-### Verificações
+Se já estiver dentro de `simplesfica/`, **não repita** o `cd simplesfica`. Para mudanças de modelos/enums/instâncias compartilhadas, encerre e inicie o app ou use Hot Restart.
+
+## Contas fictícias
+
+| Perfil | E-mail | Senha de demonstração |
+|---|---|---|
+| Cliente | `cliente@simplesfica.test` | `Cliente123!` |
+| Comerciante | `comerciante@simplesfica.test` | `Comerciante123!` |
+| Administrador | `admin@simplesfica.test` | `Admin123!` |
+| Visitante | Acesso sem credenciais | — |
+
+As credenciais estão no código (`lib/data/contas_demo.dart`) e não devem ser usadas para dados reais. Splash → Login → quatro abas públicas; a aba Perfil exibe o menu de Comerciante ou Administrador, dependendo da seleção fictícia.
+
+## Organização (Etapa 6 consolidada)
+
+```text
+lib/
+├── main.dart
+├── data/
+│   ├── contas_demo.dart
+│   ├── estabelecimentos_mock.dart
+│   └── detalhes_mock.dart
+├── models/
+│   ├── admin_demo_models.dart             # estados administrativos, publicação e atuação
+│   ├── conta_demo.dart
+│   ├── estabelecimento.dart
+│   ├── detalhes_estabelecimento.dart      # classificarOfertas() / TipoAtuacao
+│   ├── negocio_demo.dart
+│   ├── oferta.dart
+│   ├── tipo_conta.dart
+│   └── usuario_perfil.dart
+├── state/
+│   ├── app_scope.dart                     # expõe AppSession aos widgets
+│   ├── app_session.dart                   # sessão e catálogo público compartilhado
+│   ├── admin_demo_state.dart             # situação, publicação, anúncios, auditoria
+│   └── admin_business_metrics.dart       # métricas e filtros por tipo/suspensão
+├── theme/app_theme.dart
+├── utils/formatacao.dart
+├── views/
+│   ├── core/                             # Splash + quatro abas
+│   ├── auth/                             # Login/cadastro/recuperação (demo)
+│   ├── account/                          # Perfil e Favoritos
+│   ├── public/                           # Home, Explorar, detalhes
+│   ├── merchant/                         # CRUD, catálogo, vendas e prévias
+│   └── admin/
+│       ├── admin_demo_view.dart          # entrada ligada ao AppSession
+│       ├── admin_dashboard_view.dart     # painéis interativos
+│       ├── business_management_view.dart # suspensão e publicação
+│       ├── users_management_view.dart    # contas e situações
+│       ├── financial_overview_view.dart
+│       ├── ads_management_view.dart
+│       ├── audit_logs_view.dart
+│       └── reports_view.dart
+└── widgets/business/
+    └── estabelecimento_card.dart
+
+test/
+├── widget_test.dart
+├── demo_access_test.dart
+├── merchant_state_test.dart
+├── admin_demo_state_test.dart
+├── admin_dashboard_metrics_test.dart
+├── admin_business_metrics_test.dart
+├── admin_suspension_metrics_test.dart
+└── catalogo_integrado_test.dart
+
+docs/
+└── SIMPLES_FICA_Commit_Etapa_6.md
+```
+
+**Estrutura-alvo:** os arquivos da Etapa 6 não constavam integralmente da branch remota `main` na última consulta. Os arquivos `.dart` são os códigos fornecidos e aplicados durante a implementação local; esta documentação não os cria automaticamente.
+
+## Arquitetura do estado
+
+- `AppScope` é um `InheritedNotifier<AppSession>` que notifica as telas quando a sessão muda.
+- `AppSession` contém uma instância compartilhada de `AdminDemoState`, via `sessao.administracao`. Ao receber uma notificação administrativa, informa as telas públicas com `notifyListeners()`.
+- `AdminDemoView` consulta o perfil demonstrativo e passa `sessao.administracao` para `AdminDashboardView`; **não cria mais estado administrativo isolado**.
+- O administrador altera a situação de negócios/usuários, aprova ou retira publicações, pausa anúncios e analisa denúncias na memória. As alterações geram logs demonstrativos.
+- `AppSession` apresenta `estabelecimentosPublicos`, `estabelecimentoPorId`, `detalhesPorId` e `negocioDisponivelPublicamente`, usados por Home, Explorar, Favoritos e detalhes.
+- Negócios cadastrados pelo Comerciante entram em `AdminDemoState` como **não publicados**; editar as ofertas sincroniza sua classificação, **sem limpar** suspensão ou decisão de publicação.
+
+### Regra central de visibilidade
+
+```dart
+bool get visivelPublicamente =>
+    publicado && status == StatusNegocioAdmin.ativo;
+```
+
+Somente negócios **ativos E publicados** aparecem na Home/Explorar. Os suspensos/inativos continuam visíveis ao Administrador. O estado `aberto` de um estabelecimento mock se refere ao funcionamento demonstrativo do local, não à aprovação administrativa.
+
+As campanhas só aparecem ao público se o anúncio estiver ativo e seu negócio estiver visível; a Home lista patrocinados separadamente da seção orgânica, e a Explorar continua com busca e ordenação independentes de publicidade. A prévia do anúncio criada pelo Comerciante **não publica a campanha automaticamente**.
+
+### Cadastro e publicação: teste entre perfis
+
+1. Entre como Comerciante. A **Tech Cell — Demonstração** é criada como negócio local de teste, com ofertas e uma venda fictícia.
+2. Entre como Administrador; o negócio local deve constar na listagem administrativa como **não publicado**.
+3. Publique o negócio. A publicação somente é aceita se estiver **ativo e tiver oferta ativa**.
+4. Troque para Cliente. O negócio aparece na Explorar, com detalhes e ofertas da sessão.
+5. Volte ao Administrador e suspenda esse negócio. Ele some da Home/Explorar; se estiver favoritado no mesmo perfil/sessão, é tratado como indisponível no cartão de favoritos.
+6. Editar catálogo do Comerciante não deve reativar ou republicar automaticamente negócio suspenso.
+
+**Troca de perfil:** a implementação integrada preserva os negócios e estados administrativos **até reiniciar o processo**, para suportar o fluxo acima; os favoritos da conta demonstrativa são limpos na troca. Essa regra substitui a antiga descrição de limpeza integral ao sair.
+
+## Painel do proprietário
+
+| Grupo | Indicadores (cards clicáveis) | Destino |
+|---|---|---|
+| Pessoas | Clientes; ativos; inativos/não ativos; suspensos; contas de comerciante | Usuários, com filtros iniciais |
+| Estabelecimentos | Total com atuação; somente comerciantes; somente prestadores; ambos; ativos; suspensos; suspensos por atuação; visíveis ao público, se adicionado | Estabelecimentos, com filtros |
+| Operação | Inadimplência; receita fictícia aprovada; anúncios elegíveis; denúncias pendentes | Financeiro, Publicidade e Denúncias |
+
+A classificação comercial usa **ofertas ativas**: somente produtos = Comerciante; somente serviços = Prestador; produtos e serviços = Ambos; nenhuma oferta ativa = Sem ofertas. A categoria Ambos não duplica as duas exclusivas.
+
+**Suspensão de conta vs suspensão de estabelecimento** são assuntos diferentes. Um cliente `suspenso` integra o indicador de clientes não ativos; bloquear uma conta no painel demo ainda **não revoga logins reais**. Uma suspensão do estabelecimento independe do tipo de atuação: um prestador suspenso continua contando como prestador no total de cadastros.
+
+### Exemplo inicial (antes de entrar como Comerciante)
+
+| Métrica | Valor demonstrativo |
+|---|---:|
+| Negócios registrados | 5 |
+| Ativos e publicados (públicos) | 3 |
+| Suspensos | 1 (Barbearia Moderna) |
+| Inativos | 1 (Oficina Rápida) |
+| Somente comerciantes | 2 |
+| Somente prestadores | 2 |
+| Ambos | 1 (Tech Cell) |
+| Clientes / ativos / inativos | 2 / 1 / 1 |
+| Clientes suspensos | 0 |
+
+**Os números mudam** ao entrar como Comerciante (novo negócio de demonstração ainda não publicado), cadastrar produtos ou simular suspensão/publicação. Logo, não devem ser usados como constantes nas views.
+
+## Telas da Etapa 6
+
+- `admin_dashboard_view.dart`: métricas derivadas e atalhos, atualização por `AnimatedBuilder`, gráfico sintético de 14 dias.
+- `business_management_view.dart`: busca e filtros de atuação/situação, detalhes do estado de publicação, ações simuladas de suspensão e publicação confirmadas por diálogo.
+- `users_management_view.dart`: busca por nome/e-mail, situação `ativo`, `inativo`, `suspenso`, `bloqueado`, e filtro por papel; mudanças documentadas no log.
+- `financial_overview_view.dart`: pagamentos fictícios aprovados, pendentes e vencidos, sem ação financeira real.
+- `ads_management_view.dart`: campanha ativa/pausada e indicação de elegibilidade pública (depende também do negócio).
+- `audit_logs_view.dart`: eventos locais com identificação descritiva e horário da máquina, sem persistência.
+- `reports_view.dart`: denúncias de teste com classificação pendente/analisada/arquivada.
+
+## Testes
+
+Na pasta `simplesfica/`:
 
 ```bash
 flutter analyze
 flutter test
 ```
 
-> O repositório ainda utiliza o nome interno `git` no campo `name` do `pubspec.yaml`. Esse identificador poderá ser renomeado em uma etapa específica, com atualização das referências afetadas.
+Rodar individualmente caso alguma regressão seja encontrada:
 
-## Planejamento de desenvolvimento
+```bash
+flutter test test/admin_demo_state_test.dart
+flutter test test/admin_dashboard_metrics_test.dart
+flutter test test/admin_business_metrics_test.dart
+flutter test test/admin_suspension_metrics_test.dart
+flutter test test/catalogo_integrado_test.dart
+flutter test test/demo_access_test.dart
+flutter test test/merchant_state_test.dart
+```
 
-| Etapa | Escopo | Situação |
-| --- | --- | --- |
-| 0–1 | Tema, Splash, Home, Explorar e navegação inicial | Implementado |
-| 2 | Detalhes, catálogo e classificação automática | Concluído |
-| 3 | Favoritos, Perfil e navegação com quatro abas | Implementado em código |
-| 4 | Login, cadastro, tipo de conta e recuperação de senha (apenas UI) | Implementado localmente; validação manual em andamento |
-| 5 | Cadastro e painel do comerciante | Planejado |
-| 6 | Administração geral | Planejado |
-| 7 | Ajuda, configurações e telas auxiliares | Planejado |
-| 8 | Revisão de navegação, acessibilidade e testes | Planejado |
+Verificações manuais importantes:
 
-A conclusão de cada etapa deve ser registrada após validação no emulador e execução dos testes correspondentes.
+- Suspender `Tech Cell` e conferir sua ausência na Explorar.
+- Suspender `Café da Praça` e conferir ausência da publicidade, mantendo o anúncio no cadastro administrativo.
+- Reativar e conferir retorno se a publicação estiver ativa.
+- Entrar como Comerciante, consultar o novo cadastro como Administrador, publicar e conferir como Cliente.
+- Favoritos previamente salvos não devem abrir ações comerciais para negócios indisponíveis.
+- Filtro Suspensos deve continuar disponível; Ambos deve permanecer categoria exclusiva.
+- O teste antigo de logout deve ser **interpretado pela nova regra**: visitante não vê negócios comerciais pelo getter, mas cadastros/estados continuam no estado compartilhado até o reinício. Atualizar qualquer teste local que ainda exija o apagamento efetivo do catálogo administrativo no logout.
 
-## Preparação para a API futura
+**Correções recentes de compilação:** `users_management_view.dart` precisa tratar `StatusUsuarioAdmin.suspenso` no `switch`; `home_view.dart` não pode usar `const Text` quando interpola `${disponiveis.length}`. Revisar também a tipagem dos favoritos como `List<Estabelecimento>` (evitar `dynamic`). Nenhuma aprovação automática de `flutter analyze` ou `flutter test` é presumida.
 
-Os arquivos abaixo **são fontes temporárias de dados** e deverão deixar de ser utilizados quando os dados vierem de uma API:
+## Limites de segurança / persistência
 
-- `lib/data/estabelecimentos_mock.dart` — estabelecimentos demonstrativos.
-- `lib/data/detalhes_mock.dart` — ofertas, horários, endereços e avaliações demonstrativas.
+A edição de `AppSession` e a seleção de Admin são suficientes para testar navegação local, mas não são autorização segura. Um usuário malicioso poderia modificar um app Flutter; o backend deverá aplicar permissões, vínculos de propriedade, políticas de publicação, suspensão e elegibilidade de anúncios em **cada operação**. Não existem pagamentos, cobranças, moderação ou auditoria reais. O armazenamento local em memória não sobrevive a reinício nem sincroniza celulares.
 
-Os modelos, views e widgets devem ser preservados e adaptados para consumir esses dados por meio de uma camada de serviços/repositórios. `lib/state/app_session.dart` também precisará de integração com autenticação e persistência de favoritos/perfil. A camada de autenticação futura deverá integrar os formulários `lib/views/auth/` a serviços próprios, sem armazenar senhas ou segredos no aplicativo.
-
-**Não conectar o aplicativo Flutter diretamente ao SQL Server.** A comunicação futura deverá passar por uma API com validação e autorização no servidor.
-
-## Limitações atuais
-
-- Dados de estabelecimentos, distâncias, avaliações e horários são fictícios.
-- Favoritos e perfil são mantidos somente em memória.
-- Não há autenticação ou autorização reais de usuários; os formulários de login/cadastro são demonstrativos.
-- Não há consulta ao banco de dados ou integração com API.
-- Ações de WhatsApp, telefone, rota, avaliações e cadastro podem ser apenas demonstrativas.
-
-## Documentação de commits
-
-O registro técnico da etapa atual deve ser colocado em `docs/SIMPLES_FICA_Commit_Etapa_4.md`. Nele estão as regras de validação, o inventário de arquivos, os limites das ações demonstrativas e os pontos futuros de integração com a API.
-
-## Repositório
-
-[GitHub — Alisson-Teles/Simples_Fica](https://github.com/Alisson-Teles/Simples_Fica)
+**Integração futura:** Flutter → API .NET → SQL Server, com autenticação segura e persistência; não conectar o Flutter diretamente ao banco nem colocar senhas de produção no código.

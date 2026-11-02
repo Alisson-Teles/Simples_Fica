@@ -2,211 +2,155 @@
 
 **O que fica perto, fica fácil.**
 
-O **Simples Fica** é um aplicativo mobile desenvolvido em **Flutter/Dart** para facilitar a descoberta de estabelecimentos, produtos e serviços da região. O projeto evolui por etapas: navegação pública, favoritos, perfis, formulários de cadastro e gerenciamento demonstrativo de negócios.
+O **Simples Fica** é um aplicativo mobile em **Flutter/Dart** para encontrar estabelecimentos, produtos e serviços locais. A evolução do projeto segue etapas documentadas; a **Etapa 6 — Administração Geral** acrescenta painéis de acompanhamento e regras demonstrativas que conectam **Administração, Comerciante e áreas públicas**.
 
-> **Situação desta entrega:** o código dos **acessos demonstrativos** (Cliente, Comerciante, Administrador e Visitante) foi preparado para integração local. Após aplicar os arquivos e executar os testes, o aplicativo abrirá a **LoginView depois da Splash**. **Não se trata de autenticação, cadastro persistente ou autorização real.** As senhas abaixo são exemplos públicos para testes, nunca credenciais de produção.
+> **Status da entrega:** este README documenta o **estado-alvo local após aplicar a Etapa 6 e seus complementos**. Na última consulta à branch remota `main`, parte dos arquivos da Etapa 6 ainda não estava publicada. Execute a validação local antes do commit. Não existe autenticação, autorização, cobrança, moderação ou sincronização real entre dispositivos.
 
-## Organização do repositório
-
-O repositório é organizado em dois projetos independentes, ainda **sem integração funcional entre si**:
+## Estrutura do repositório
 
 ```text
 Simples_Fica/
-├── README.md                            # Apresentação geral (este arquivo)
-├── simplesfica/                         # Aplicativo Flutter
-│   ├── README.md                        # Instruções específicas do Flutter
-│   ├── android/ ios/ linux/ macos/ web/ windows/
+├── README.md
+├── simplesfica/                      # Flutter / Dart (aplicativo mobile)
+│   ├── README.md
 │   ├── lib/
 │   ├── test/
-│   ├── docs/                            # Documentação das entregas
-│   ├── pubspec.yaml
-│   ├── pubspec.lock
-│   └── analysis_options.yaml
-└── backsimplesfica/
-    └── APISimplesFica/                   # Estrutura inicial de projeto .NET
-        ├── APISimplesFica.slnx
-        └── APISimplesFica/
-            ├── Controllers/
-            ├── Program.cs
-            ├── appsettings.json
-            └── APISimplesFica.csproj
+│   ├── docs/
+│   │   └── SIMPLES_FICA_Commit_Etapa_6.md
+│   └── pubspec.yaml
+└── backsimplesfica/                 # Projeto inicial de API .NET, separado
+    └── APISimplesFica/
 ```
 
-A presença da pasta `backsimplesfica/` **não** significa que o aplicativo Flutter já utiliza a API ou um banco de dados. A camada de integração ainda precisa ser desenvolvida. Pastas temporárias do .NET, como `obj/` e `bin/`, não devem fazer parte de commits futuros.
+O projeto `.NET` existente **não está integrado** ao Flutter e a aplicação não acessa diretamente o SQL Server. O desenvolvimento atual é um protótipo funcional **em memória no mesmo processo**.
 
 ## Tecnologias
 
-- **Flutter / Dart:** aplicativo e formulários mobile, com Material Design 3.
-- **ChangeNotifier + InheritedNotifier:** estado da sessão mantido na memória pelo `AppSession` e exposto pelo `AppScope`.
-- **Flutter Test:** testes unitários do estado, negócios e acessos demonstrativos.
-- **.NET:** projeto inicial de API presente em `backsimplesfica/`, ainda sem integração com as views.
-- **SQL Server:** previsto para uma etapa posterior; não é utilizado no fluxo demonstrativo atual.
+- **Flutter / Dart / Material:** interface mobile e navegação.
+- **`ChangeNotifier` + `InheritedNotifier` (`AppSession` / `AppScope`):** compartilhamento dos estados demonstrativos entre as views.
+- **`AdminDemoState`:** estado administrativo compartilhado na sessão, com situações, publicação, anúncios, indicadores, denúncias e auditoria.
+- **`Flutter Test`:** testes do catálogo, regras administrativas, clientes, comerciantes e interfaces.
+- **API .NET / SQL Server:** estrutura em desenvolvimento, **sem uso pelo aplicativo nesta entrega**.
 
-## Funcionalidades do protótipo
+## Acesso à demonstração
 
-| Área | Funcionalidade | Situação |
-|---|---|---|
-| Apresentação | Splash e navegação | Implementada; abertura do Login no complemento de testes |
-| Público | Home, Explorar, filtros, detalhes e avaliações de exemplo | Dados fictícios |
-| Catálogo | Produtos/serviços e classificação por ofertas ativas | Em memória / mocks |
-| Favoritos | Adicionar e remover entre as quatro abas | Em memória |
-| Perfil | Exibição e edição de dados | Em memória |
-| Cadastro | Tipo de conta, registro e recuperação de senha | Formulários sem servidor |
-| Comerciante | Negócios, ofertas, estoque e vendas | Gerenciamento demonstrativo em memória |
-| Assinatura/publicidade | Escolha de plano e prévia de anúncio | Simulação, sem contratação |
-| Administrador | Prévia de indicadores e módulos futuros | Sem poderes administrativos reais |
-| Acessos demonstrativos | Cliente, Comerciante, Administrador e Visitante | Contas fictícias locais, sem autenticação real |
+O fluxo de testes é **Splash → Login → Home / Explorar / Favoritos / Perfil**. Na aba Perfil, cada conta visualiza os atalhos de seu papel demonstrativo.
 
-## Acessar o aplicativo para testes
-
-Depois de aplicar o complemento dos acessos demonstrativos, o fluxo é:
-
-```text
-SplashView → LoginView
-               ├── Cliente ────────→ Início / Explorar / Favoritos / Perfil
-               ├── Comerciante ────→ Abas públicas + Meus negócios (demo)
-               ├── Administrador ──→ Abas públicas + Painel administrativo (prévia)
-               └── Visitante ──────→ Abas públicas sem conta
-```
-
-A tela de Login oferece botões para **preencher as credenciais fictícias automaticamente**. Se preferir, digite os valores manualmente:
-
-| Acesso | E-mail de teste | Senha de teste |
+| Perfil | E-mail público de teste | Senha fictícia |
 |---|---|---|
 | Cliente | `cliente@simplesfica.test` | `Cliente123!` |
 | Comerciante | `comerciante@simplesfica.test` | `Comerciante123!` |
 | Administrador | `admin@simplesfica.test` | `Admin123!` |
+| Visitante | Não requer credenciais | — |
 
-Essas credenciais estão declaradas em `simplesfica/lib/data/contas_demo.dart`. **São dados públicos de demonstração, sem proteção de contas verdadeiras.** Não use senhas pessoais nos testes.
+Essas credenciais estão em `simplesfica/lib/data/contas_demo.dart`, são deliberadamente públicas e **não devem ser usadas com dados reais**. Os formulários Criar conta e Esqueci a senha continuam demonstrativos.
 
-### O que cada perfil pode visualizar
+## Funcionalidades por etapa
 
-- **Visitante:** Home, Explorar, Favoritos e Perfil; pode selecionar uma conta de teste posteriormente.
-- **Cliente:** navegação pública, favoritos, edição do perfil local e opção de trocar de conta.
-- **Comerciante:** navegação pública e acesso a **Perfil → Meus negócios (demo)**. O cenário inicial inclui a **Tech Cell — Demonstração**, com dois produtos, um serviço e uma venda de exemplo.
-- **Administrador:** navegação pública e acesso a **Perfil → Painel administrativo (demo)**, que apenas apresenta contagens fictícias e os módulos previstos para a próxima etapa. **Não existe administração real ainda.**
+| Etapa | Escopo | Condição descrita |
+|---|---|---|
+| 0–2 | Estrutura, Home, Explorar, detalhes e catálogo | Catálogo fictício com ofertas e classificação por atuação |
+| 3 | Favoritos e perfil | Estado local e interface pública |
+| 4 + complemento | Login visual, cadastro, recuperação e contas de teste | Sem autenticação real |
+| 5 | Área do comerciante | CRUD local de negócios/ofertas; estoque, vendas, prévias de assinatura/anúncio |
+| **6** | **Administração Geral** | **Sete módulos, indicadores interativos, suspensão e publicação vinculadas à navegação pública (código para validar localmente)** |
+| 7–8 | Telas auxiliares, refinamento, testes de revisão | Próximas etapas |
 
-**Trocar de conta ou sair limpa os dados temporários** do acesso anterior (favoritos, negócios, vendas e prévias de anúncio). Ao entrar como Comerciante novamente, o cenário inicial é recriado. Não há persistência após o encerramento do processo.
+### Etapa 6 — módulos administrativos
 
-Os formulários **Criar conta** e **Esqueci a senha** seguem demonstrativos: não criam usuários nem enviam mensagens. As três contas acima são os únicos acessos predefinidos no código desse complemento.
+| Tela | Responsabilidade |
+|---|---|
+| `AdminDashboardView` | Indicadores interativos, gráficos fictícios e atalhos |
+| `BusinessManagementView` | Busca/filtro por situação e atuação; simular suspensão, reativação e publicação |
+| `UsersManagementView` | Pesquisa e filtros de Cliente, Comerciante e Administrador; estados ativo/inativo/suspenso/bloqueado |
+| `FinancialOverviewView` | Pagamentos demonstrativos e indicadores de receita aprovada/inadimplência; somente consulta |
+| `AdsManagementView` | Anúncios fictícios ativos/pausados e elegibilidade pública |
+| `AuditLogsView` | Registro local das alterações realizadas no painel |
+| `ReportsView` | Denúncias fictícias e simulação de análise/arquivamento |
 
-## Estrutura de diretórios do Flutter
+### Indicadores interativos
 
-Os caminhos a seguir são relativos à pasta `simplesfica/`:
+Os cartões abrem as telas correspondentes, com filtros iniciais quando aplicável:
+
+- **Pessoas:** Clientes, Clientes ativos, Clientes inativos (inclui suspensos/bloqueados), Clientes suspensos e Contas de comerciante.
+- **Estabelecimentos:** Comerciantes/Prestadores (total com ofertas ativas), Somente comerciantes, Somente prestadores, Ambos, Negócios ativos, Suspensos, Comerciantes suspensos, Prestadores suspensos, Ambos suspensos e indicador de Visíveis ao público quando incluído no Dashboard local.
+- **Operação:** Inadimplentes, Receita aprovada (demo), Anúncios ativos elegíveis e Denúncias pendentes.
+
+**Contas de comerciante ≠ estabelecimentos comerciais.** Uma conta é um registro de usuário; um negócio é um cadastro de estabelecimento. **Ambos** é uma classificação exclusiva para estabelecimentos com produtos **e** serviços ativos, sem contagem duplicada.
+
+## Regras compartilhadas de disponibilidade
+
+A Etapa 6 corrige a inconsistência entre o painel administrativo e as telas públicas. A referência é o `AdminDemoState` compartilhado pelo `AppSession` durante a execução.
 
 ```text
-simplesfica/
-├── lib/
-│   ├── main.dart                         # MaterialApp + AppScope
-│   ├── data/
-│   │   ├── contas_demo.dart              # Credenciais públicas de teste [NOVO]
-│   │   ├── estabelecimentos_mock.dart    # Estabelecimentos fictícios
-│   │   └── detalhes_mock.dart            # Ofertas, horários e avaliações fictícias
-│   ├── models/
-│   │   ├── conta_demo.dart               # Tipo de acesso e modelo [NOVO]
-│   │   ├── estabelecimento.dart
-│   │   ├── detalhes_estabelecimento.dart # Classificação automática
-│   │   ├── negocio_demo.dart             # Negócios e vendas locais
-│   │   ├── oferta.dart                   # Produto / serviço
-│   │   ├── tipo_conta.dart               # Cliente/comerciante no cadastro
-│   │   └── usuario_perfil.dart
-│   ├── state/
-│   │   ├── app_session.dart              # Sessão, favoritos, negócios, vendas [ATUALIZADO]
-│   │   └── app_scope.dart                # Estado compartilhado para widgets
-│   ├── theme/
-│   │   └── app_theme.dart
-│   ├── utils/
-│   │   └── formatacao.dart
-│   ├── views/
-│   │   ├── core/
-│   │   │   ├── splash_view.dart           # Abre o Login [ATUALIZADO]
-│   │   │   └── main_navigation_view.dart # Quatro abas públicas
-│   │   ├── auth/
-│   │   │   ├── login_view.dart            # Acessos rápidos [ATUALIZADO]
-│   │   │   ├── register_view.dart
-│   │   │   ├── account_type_view.dart
-│   │   │   └── forgot_password_view.dart
-│   │   ├── account/
-│   │   │   ├── profile_view.dart          # Menus conforme perfil [ATUALIZADO]
-│   │   │   ├── favorites_view.dart
-│   │   │   └── edit_profile_view.dart
-│   │   ├── public/
-│   │   │   ├── home_view.dart
-│   │   │   ├── explore_view.dart
-│   │   │   └── business_detail_view.dart
-│   │   ├── merchant/
-│   │   │   ├── merchant_dashboard_view.dart
-│   │   │   ├── business_registration_view.dart
-│   │   │   ├── edit_business_view.dart
-│   │   │   ├── business_preview_view.dart
-│   │   │   ├── offerings_view.dart
-│   │   │   ├── offering_form_view.dart
-│   │   │   ├── sales_view.dart
-│   │   │   ├── subscription_view.dart
-│   │   │   └── advertising_view.dart
-│   │   └── admin/
-│   │       └── admin_demo_view.dart       # Prévia da Etapa 6 [NOVO]
-│   └── widgets/business/
-│       └── estabelecimento_card.dart
-├── test/
-│   ├── widget_test.dart
-│   ├── merchant_state_test.dart
-│   └── demo_access_test.dart            # Testes dos acessos [NOVO]
-├── docs/
-│   └── SIMPLES_FICA_Commit_Acessos_Demonstrativos.md
-├── pubspec.yaml
-├── pubspec.lock
-└── README.md
+                   AppSession / AppScope
+                           │
+                    AdminDemoState
+                (situação + publicação)
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+       Home/Explorar    Comerciante     Administração
+       e detalhes      (cadastros)     (moderação demo)
 ```
 
-Os arquivos identificados com **[NOVO]** e **[ATUALIZADO]** pertencem ao complemento de testes após a Etapa 5. A estrutura descreve o resultado esperado **depois que esses arquivos forem adicionados e publicados**.
+Um estabelecimento aparece na Home e na Explorar **somente quando está administrativamente ativo e publicado**. Estabelecimentos suspensos e inativos permanecem no cadastro administrativo, mas não são mostrados publicamente. O campo `aberto` usado em alguns mocks é **horário/funcionamento fictício** e **não** indica situação administrativa.
 
-## Regras principais preservadas
+| Situação | Registro administrativo | Home/Explorar | Publicidade pública |
+|---|---|---|---|
+| Ativo e publicado | Sim | Sim | Apenas se houver anúncio ativo elegível |
+| Ativo e não publicado | Sim | Não | Não |
+| Suspenso | Sim | Não | Não |
+| Inativo | Sim | Não | Não |
 
-1. **Classificação do estabelecimento:** depende exclusivamente de ofertas **ativas**, não do tipo de conta do usuário. Produto ativo + serviço ativo = **Produtos e serviços**.
-2. **Venda demonstrativa:** exige oferta ativa, preço positivo e quantidade válida; produtos exigem estoque suficiente. O registro reduz o saldo e soma uma receita fictícia, sem pagamento.
-3. **Isolamento de contas de teste:** trocar/sair limpa a sessão anterior; não existe armazenamento permanente nem dados reais compartilhados.
-4. **Separação de publicidade:** destacar uma oferta no catálogo não é o mesmo que contratar um anúncio; ambos os recursos são apenas demonstrativos neste estágio.
-5. **Controle visual de perfil não é segurança:** a navegação oculta menus conforme o perfil selecionado, porém **nenhuma autorização real é fornecida**. O backend deverá impor permissões para todas as operações administrativas no futuro.
+**Referência inicial dos cinco mocks:** 5 cadastrados, 3 ativos/publicados/visíveis, 1 suspenso (**Barbearia Moderna**) e 1 inativo (**Oficina Rápida**). Classificação de atuação: 2 somente comerciantes, 2 somente prestadores e 1 ambos (**Tech Cell**). Esses valores **mudam** com as ações de teste e com cadastros adicionais; não são números fixos do sistema.
 
-## Executar e verificar
+A Home separa anúncios patrocinados de resultados orgânicos. A Explorar aplica pesquisa, cidade, categoria, atuação, avaliação e horário **após** filtrar a disponibilidade. Favoritos de um negócio indisponível podem continuar salvos, mas devem aparecer sinalizados e sem ações comerciais; a tela de detalhes verifica novamente a situação.
 
-Clone o repositório e entre na **subpasta Flutter**:
+### Fluxo Comerciante → Administrador → Cliente
+
+1. Comerciante cadastra um negócio e suas ofertas no painel local.
+2. O cadastro aparece na Administração como **não publicado**; não entra automaticamente na Home/Explorar.
+3. Administrador pode publicar somente negócio **ativo e com pelo menos uma oferta ativa**.
+4. O Cliente passa a encontrá-lo nas telas públicas enquanto a execução do app permanecer ativa.
+5. Se o Administrador suspender o negócio, ele some imediatamente das listas públicas e dos anúncios elegíveis, **mas permanece no cadastro administrativo**.
+6. Editar o negócio ou suas ofertas no painel comercial não deve retirar a suspensão administrativa.
+
+Ao trocar de conta, os **favoritos do perfil de teste são limpos**, mas os **cadastros/estados demonstrativos de negócios permanecem em memória** para permitir a validação desse fluxo entre perfis. A memória é reiniciada quando o processo do app é reiniciado; **não há persistência nem sincronização entre celulares**.
+
+## Executar e testar
+
+Abra um terminal na pasta `simplesfica/` (onde está o `pubspec.yaml`):
 
 ```bash
-git clone https://github.com/Alisson-Teles/Simples_Fica.git
-cd Simples_Fica/simplesfica
 flutter pub get
 flutter analyze
 flutter test
 flutter run
 ```
 
-Para testar só os acessos:
+Testes da Etapa 6 e da integração:
 
 ```bash
-flutter test test/demo_access_test.dart
+flutter test test/admin_demo_state_test.dart
+flutter test test/admin_dashboard_metrics_test.dart
+flutter test test/admin_business_metrics_test.dart
+flutter test test/admin_suspension_metrics_test.dart
+flutter test test/catalogo_integrado_test.dart
 ```
 
-O `flutter analyze` e os testes precisam ser executados localmente após copiar os códigos. Não há verificação de compilação ou publicação feita por esta documentação.
+Os nomes acima correspondem aos arquivos entregues durante as implementações; confirme que todos foram copiados para `test/`. É necessário verificar também os testes antigos (`demo_access_test.dart`, `merchant_state_test.dart` e `widget_test.dart`) para regressões.
 
-## Roadmap e próximos passos
+A etapa **não é considerada publicada apenas por estar documentada**. Verifique o funcionamento no emulador, o resultado de `flutter analyze`/`flutter test` e o diff do Git antes do push.
 
-| Etapa | Escopo | Situação desta entrega |
-|---|---|---|
-| 0–2 | Fundação, catálogo e detalhes públicos | Implementado em código |
-| 3 | Favoritos e perfil | Implementado em código |
-| 4 | Interfaces de login, cadastro e recuperação | Implementado, ainda sem backend |
-| 5 | Área do comerciante (CRUD, estoque, vendas e prévias) | Implementado localmente, com testes a validar |
-| Complemento 4/5 | **Acessos demonstrativos e cenário inicial do comerciante** | **Preparado para commit; validar no emulador** |
-| 6 | Administração geral | A prévia de acesso existe; painel completo pendente |
-| 7–8 | Configurações, revisão de UX e testes finais | Planejado |
+## Limitações e próximos passos
 
-### Integração com a API
-
-O repositório já contém um projeto .NET inicial em `backsimplesfica/`, **ainda não conectado** ao Flutter. Para evoluir além do protótipo, serão necessários autenticação e autorização no servidor, persistência de contas/negócios/ofertas/vendas e comunicação HTTP entre app e API. Não armazenar segredos de produção no app nem estabelecer conexão direta do Flutter com SQL Server.
+- `ehAdministrador` é uma regra visual/local; **não é autenticação nem autorização confiável**.
+- Suspensões, publicações, receitas, anúncios e denúncias são **simulações**; nenhuma alteração é aplicada em dispositivos de terceiros.
+- O controle de publicação e a auditoria existem somente em memória; não há recuperação após reinício do processo.
+- Compras e vendas do comerciante são fictícias, sem pagamento.
+- Métricas de distância, horários e avaliações dos novos negócios locais ainda não são calculadas por serviços reais.
+- Próxima evolução: **Flutter → API .NET → SQL Server**, com autenticação/autorização no servidor, propriedade dos negócios, persistência, moderação, métricas e auditoria durável. Não conectar o Flutter diretamente ao SQL Server nem colocar segredos de produção no aplicativo.
 
 
-## Repositório
-
-[GitHub — Alisson-Teles/Simples_Fica](https://github.com/Alisson-Teles/Simples_Fica)
+Repositório: [Alisson-Teles/Simples_Fica](https://github.com/Alisson-Teles/Simples_Fica).
