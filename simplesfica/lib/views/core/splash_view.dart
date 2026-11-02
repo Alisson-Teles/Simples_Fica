@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
-import 'main_navigation_view.dart';
+import '../auth/login_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -25,7 +25,7 @@ class _SplashViewState extends State<SplashView> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>
-            const MainNavigationView(),
+            const LoginView(),
           ),
         );
       },

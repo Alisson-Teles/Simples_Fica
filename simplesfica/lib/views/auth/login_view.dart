@@ -1,8 +1,12 @@
 
 import 'package:flutter/material.dart';
 
+import '../../data/contas_demo.dart';
+import '../../models/conta_demo.dart';
+import '../../state/app_scope.dart';
 import '../../theme/app_theme.dart';
 
+import '../core/main_navigation_view.dart';
 import 'account_type_view.dart';
 import 'forgot_password_view.dart';
 
@@ -10,14 +14,32 @@ class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<LoginView> createState() =>
+      _LoginViewState();
 }
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
 
+  final _emailController =
+  TextEditingController();
+
+  final _senhaController =
+  TextEditingController();
+
   bool _mostrarSenha = false;
   bool _verificando = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _senhaController.dispose();
+    super.dispose();
+  }
+
+  // =====================================
+  // VALIDAÇÕES
+  // =====================================
 
   String? _validarEmail(String? valor) {
     final email = valor?.trim() ?? '';
@@ -45,40 +67,101 @@ class _LoginViewState extends State<LoginView> {
     return null;
   }
 
-  Future<void> _validarDemonstracao() async {
+  // =====================================
+  // NAVEGAÇÃO PRINCIPAL
+  // =====================================
+
+  void _abrirAplicativo() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) =>
+        const MainNavigationView(),
+      ),
+          (route) => false,
+    );
+  }
+
+  // =====================================
+  // LOGIN DEMONSTRATIVO
+  // =====================================
+
+  Future<void> _entrar() async {
     FocusScope.of(context).unfocus();
+
+    if (_verificando) return;
 
     final valido =
         _formKey.currentState?.validate() ?? false;
 
-    if (!valido || _verificando) {
-      return;
-    }
+    if (!valido) return;
 
     setState(() {
       _verificando = true;
     });
 
-    // Apenas demonstra o estado visual de carregamento.
+    // Pequeno carregamento visual de teste.
     await Future<void>.delayed(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 400),
     );
 
     if (!mounted) return;
+
+    final conta = buscarContaDemo(
+      _emailController.text,
+      _senhaController.text,
+    );
 
     setState(() {
       _verificando = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Campos validados localmente. '
-              'Nenhum login foi realizado.',
+    if (conta == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Conta demonstrativa não encontrada '
+                'ou senha incorreta.',
+          ),
         ),
-      ),
-    );
+      );
+
+      return;
+    }
+
+    // Seleciona o perfil fictício na sessão.
+    AppScope.of(context).iniciarContaDemo(conta);
+
+    _abrirAplicativo();
   }
+
+  // =====================================
+  // ENTRAR COMO VISITANTE
+  // =====================================
+
+  void _entrarComoVisitante() {
+    AppScope.of(context).entrarComoVisitante();
+
+    _abrirAplicativo();
+  }
+
+  // =====================================
+  // PREENCHIMENTO AUTOMÁTICO
+  // =====================================
+
+  void _preencherConta(ContaDemo conta) {
+    _emailController.text = conta.email;
+    _senhaController.text = conta.senha;
+
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _mostrarSenha = false;
+    });
+  }
+
+  // =====================================
+  // CADASTRO E RECUPERAÇÃO
+  // =====================================
 
   void _abrirCadastro() {
     Navigator.of(context).push(
@@ -98,13 +181,54 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  // =====================================
+  // BOTÃO DE ACESSO RÁPIDO
+  // =====================================
+
+  Widget _botaoContaDemo(ContaDemo conta) {
+    final IconData icone;
+
+    switch (conta.tipo) {
+      case TipoAcessoDemo.cliente:
+        icone = Icons.person_outline;
+        break;
+
+      case TipoAcessoDemo.comerciante:
+        icone = Icons.storefront_outlined;
+        break;
+
+      case TipoAcessoDemo.administrador:
+        icone = Icons.admin_panel_settings_outlined;
+        break;
+
+      case TipoAcessoDemo.visitante:
+        icone = Icons.person_search_outlined;
+        break;
+    }
+
+    return OutlinedButton.icon(
+      onPressed: _verificando
+          ? null
+          : () => _preencherConta(conta),
+
+      icon: Icon(icone),
+
+      label: Text(conta.tipo.titulo),
+    );
+  }
+
+  // =====================================
+  // INTERFACE
+  // =====================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
 
       appBar: AppBar(
-        title: const Text('Entrar'),
+        title: const Text('Simples Fica'),
+        automaticallyImplyLeading: false,
       ),
 
       body: SafeArea(
@@ -123,21 +247,22 @@ class _LoginViewState extends State<LoginView> {
                 padding: const EdgeInsets.all(24),
 
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
 
                   const Icon(
-                    Icons.lock_outline,
-                    size: 56,
+                    Icons.storefront,
+                    size: 60,
                     color: AppTheme.primary,
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   const Text(
-                    'Bem-vindo de volta',
+                    'Bem-vindo ao Simples Fica',
                     textAlign: TextAlign.center,
+
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.brown,
                     ),
@@ -146,23 +271,26 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(height: 8),
 
                   const Text(
-                    'Entre para acessar sua conta.',
+                    'Escolha uma conta demonstrativa '
+                        'ou continue como visitante.',
                     textAlign: TextAlign.center,
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
-                  // CAMPO DE E-MAIL
+                  // EMAIL
                   TextFormField(
+                    controller: _emailController,
+                    enabled: !_verificando,
                     keyboardType:
                     TextInputType.emailAddress,
                     textInputAction:
                     TextInputAction.next,
-                    enabled: !_verificando,
 
                     decoration: const InputDecoration(
                       labelText: 'E-mail',
-                      hintText: 'usuario@exemplo.com',
+                      hintText:
+                      'cliente@simplesfica.test',
                       prefixIcon:
                       Icon(Icons.email_outlined),
                       border: OutlineInputBorder(),
@@ -171,12 +299,13 @@ class _LoginViewState extends State<LoginView> {
                     validator: _validarEmail,
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
 
-                  // CAMPO DE SENHA
+                  // SENHA
                   TextFormField(
-                    obscureText: !_mostrarSenha,
+                    controller: _senhaController,
                     enabled: !_verificando,
+                    obscureText: !_mostrarSenha,
 
                     decoration: InputDecoration(
                       labelText: 'Senha',
@@ -204,53 +333,128 @@ class _LoginViewState extends State<LoginView> {
                     ),
 
                     validator: _validarSenha,
+
                     onFieldSubmitted: (_) {
-                      _validarDemonstracao();
+                      _entrar();
                     },
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 22),
 
                   // BOTÃO ENTRAR
                   SizedBox(
                     width: double.infinity,
 
-                    child: ElevatedButton(
-                      onPressed: _verificando
-                          ? null
-                          : _validarDemonstracao,
+                    child: ElevatedButton.icon(
+                      onPressed:
+                      _verificando ? null : _entrar,
 
-                      child: _verificando
+                      icon: _verificando
                           ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: 18,
+                        width: 18,
+
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
-                          : const Text('Entrar'),
+                          : const Icon(Icons.login),
+
+                      label: Text(
+                        _verificando
+                            ? 'Verificando...'
+                            : 'Entrar (demo)',
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
 
-                  TextButton(
-                    onPressed: _abrirRecuperacao,
-                    child: const Text('Esqueci a senha'),
+                  OutlinedButton.icon(
+                    onPressed: _verificando
+                        ? null
+                        : _entrarComoVisitante,
+
+                    icon: const Icon(
+                      Icons.explore_outlined,
+                    ),
+
+                    label: const Text(
+                      'Continuar como visitante',
+                    ),
                   ),
 
-                  TextButton(
-                    onPressed: _abrirCadastro,
-                    child: const Text('Criar conta'),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.center,
+
+                    children: [
+                      TextButton(
+                        onPressed: _abrirCadastro,
+                        child: const Text('Criar conta'),
+                      ),
+
+                      TextButton(
+                        onPressed: _abrirRecuperacao,
+                        child: const Text(
+                          'Esqueci a senha',
+                        ),
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 22),
+
+                  const Divider(),
+
+                  const SizedBox(height: 14),
 
                   const Text(
-                    'DEMONSTRAÇÃO DE INTERFACE\n'
-                        'Nenhuma credencial será autenticada.',
+                    'ACESSOS RÁPIDOS DE TESTE',
                     textAlign: TextAlign.center,
+
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.brown,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  const Text(
+                    'Toque em um perfil para '
+                        'preencher o e-mail e a senha. '
+                        'Depois pressione Entrar.',
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+
+                    children: [
+                      for (final conta in contasDemo)
+                        _botaoContaDemo(conta),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    'MODO DEMONSTRAÇÃO\n'
+                        'As credenciais são fictícias '
+                        'e ficam no código do aplicativo. '
+                        'Nenhuma autenticação real '
+                        'é realizada. Não utilize '
+                        'senhas pessoais nos testes.',
+                    textAlign: TextAlign.center,
+
                     style: TextStyle(
                       fontSize: 12,
                       color: Color(0xFF78645C),
