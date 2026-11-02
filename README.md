@@ -24,12 +24,14 @@ O **Simples Fica** é um aplicativo mobile em desenvolvimento para aproximar pes
 - **Favoritos:** inclusão e remoção com estado compartilhado entre as telas durante a sessão.
 - **Perfil:** exibição e edição de nome, e-mail e telefone com validações locais.
 - **Navegação inferior:** Início, Explorar, Favoritos e Perfil.
+- **Autenticação demonstrativa (Etapa 4):** telas de login, cadastro, escolha de tipo de conta e recuperação de senha com validações locais, **sem autenticar ou criar contas**.
+- **Entrada no fluxo:** Perfil → Entrar ou criar conta → Login → Cadastro/Recuperação; as quatro abas públicas continuam acessíveis sem login.
 
 As telas e ações de demonstração **não representam operações reais de pagamento, avaliação publicada, envio de mensagens ou gravação em servidor**.
 
 ## Estrutura de diretórios
 
-A estrutura abaixo corresponde aos arquivos presentes no repositório na conclusão da Etapa 3:
+A estrutura abaixo representa o projeto local esperado após a implementação da **Etapa 4**. Os arquivos dessa etapa devem ser publicados no GitHub no próximo commit:
 
 ```text
 Simples_Fica/
@@ -51,7 +53,8 @@ Simples_Fica/
 │   │   ├── estabelecimento.dart
 │   │   ├── oferta.dart
 │   │   ├── detalhes_estabelecimento.dart
-│   │   └── usuario_perfil.dart
+│   │   ├── usuario_perfil.dart
+│   │   └── tipo_conta.dart              # Cliente ou comerciante no fluxo de cadastro
 │   │
 │   ├── state/                       # Estado compartilhado durante a sessão
 │   │   ├── app_session.dart         # Favoritos e perfil em memória
@@ -68,10 +71,15 @@ Simples_Fica/
 │   │   │   ├── home_view.dart
 │   │   │   ├── explore_view.dart
 │   │   │   └── business_detail_view.dart
-│   │   └── account/
-│   │       ├── favorites_view.dart
-│   │       ├── profile_view.dart
-│   │       └── edit_profile_view.dart
+│   │   ├── account/
+│   │   │   ├── favorites_view.dart
+│   │   │   ├── profile_view.dart         # Acesso às novas views de autenticação
+│   │   │   └── edit_profile_view.dart
+│   │   └── auth/                        # Interfaces de login e cadastro (Etapa 4)
+│   │       ├── login_view.dart
+│   │       ├── account_type_view.dart
+│   │       ├── register_view.dart
+│   │       └── forgot_password_view.dart
 │   │
 │   └── widgets/                     # Componentes reutilizáveis
 │       └── business/
@@ -79,6 +87,8 @@ Simples_Fica/
 │
 ├── test/
 │   └── widget_test.dart            # Testes do AppSession
+├── docs/                          # Registros técnicos de entregas
+│   └── SIMPLES_FICA_Commit_Etapa_4.md
 ├── pubspec.yaml                    # Dependências e configuração Flutter
 ├── pubspec.lock                    # Versões resolvidas das dependências
 ├── analysis_options.yaml          # Regras de análise do Dart
@@ -97,7 +107,8 @@ Simples_Fica/
 | `lib/theme/` | Configuração visual reutilizada por todo o app. |
 | `lib/views/core/` | Abertura do aplicativo e navegação principal. |
 | `lib/views/public/` | Descoberta de negócios e detalhes públicos. |
-| `lib/views/account/` | Favoritos e perfil demonstrativo. |
+| `lib/views/account/` | Favoritos e perfil demonstrativo; ponto de entrada do login. |
+| `lib/views/auth/` | Formulários de autenticação, tipo de conta, cadastro e recuperação (somente interface). |
 | `lib/widgets/business/` | Componentes visuais reutilizáveis de estabelecimentos. |
 | `test/` | Testes automatizados. |
 
@@ -122,6 +133,24 @@ A classificação pública é calculada a partir do **catálogo de ofertas ativa
 ### Favoritos e perfil
 
 `AppSession` controla os IDs de estabelecimentos favoritos e os dados do perfil demonstrativo. `AppScope` disponibiliza a mesma instância para as views. As alterações são refletidas na sessão atual, **sem persistência após o encerramento do aplicativo**.
+
+### Tipo de conta e tipo de atuação: conceitos diferentes
+
+- `lib/models/tipo_conta.dart`: distingue **Cliente** e **Comerciante** durante a escolha do cadastro.
+- `lib/models/detalhes_estabelecimento.dart`: calcula se um **estabelecimento** atua com produtos, serviços ou ambos, de acordo com ofertas ativas.
+- O tipo de conta **não** concede permissões reais nesta fase. No futuro, regras administrativas deverão ser autorizadas pelo backend.
+
+### Login e cadastro demonstrativos (Etapa 4)
+
+As interfaces de autenticação incluem validações locais de formato de e-mail, nome, telefone, senha e confirmação de senha. O login apresenta estado de carregamento simulado; a recuperação de senha somente valida o formato do e-mail. Todos os fluxos sinalizam que **nenhum login, cadastro ou e-mail foi realizado**.
+
+```text
+Perfil → Entrar ou criar conta → Login
+                                 ├── Criar conta → Tipo de conta → Cadastro
+                                 └── Esqueci a senha → Recuperação de senha
+```
+
+**Não utilize senhas reais nos testes.** O app não possui usuários cadastrados ou autenticação real. A Splash continua abrindo as quatro abas públicas; a tela de login é acessada pelo Perfil. O acesso demonstrativo por tipo de usuário e a abertura automática do login após a Splash são ideias para uma implementação posterior, **não estão prontas**.
 
 ## Como executar
 
@@ -156,7 +185,7 @@ flutter test
 | 0–1 | Tema, Splash, Home, Explorar e navegação inicial | Implementado |
 | 2 | Detalhes, catálogo e classificação automática | Concluído |
 | 3 | Favoritos, Perfil e navegação com quatro abas | Implementado em código |
-| 4 | Interfaces de login, cadastro e recuperação de senha | Planejado |
+| 4 | Login, cadastro, tipo de conta e recuperação de senha (apenas UI) | Implementado localmente; validação manual em andamento |
 | 5 | Cadastro e painel do comerciante | Planejado |
 | 6 | Administração geral | Planejado |
 | 7 | Ajuda, configurações e telas auxiliares | Planejado |
@@ -171,7 +200,7 @@ Os arquivos abaixo **são fontes temporárias de dados** e deverão deixar de se
 - `lib/data/estabelecimentos_mock.dart` — estabelecimentos demonstrativos.
 - `lib/data/detalhes_mock.dart` — ofertas, horários, endereços e avaliações demonstrativas.
 
-Os modelos, views e widgets devem ser preservados e adaptados para consumir esses dados por meio de uma camada de serviços/repositórios. `lib/state/app_session.dart` também precisará de integração com autenticação e persistência de favoritos/perfil.
+Os modelos, views e widgets devem ser preservados e adaptados para consumir esses dados por meio de uma camada de serviços/repositórios. `lib/state/app_session.dart` também precisará de integração com autenticação e persistência de favoritos/perfil. A camada de autenticação futura deverá integrar os formulários `lib/views/auth/` a serviços próprios, sem armazenar senhas ou segredos no aplicativo.
 
 **Não conectar o aplicativo Flutter diretamente ao SQL Server.** A comunicação futura deverá passar por uma API com validação e autorização no servidor.
 
@@ -179,9 +208,13 @@ Os modelos, views e widgets devem ser preservados e adaptados para consumir esse
 
 - Dados de estabelecimentos, distâncias, avaliações e horários são fictícios.
 - Favoritos e perfil são mantidos somente em memória.
-- Não há autenticação ou autorização de usuários.
+- Não há autenticação ou autorização reais de usuários; os formulários de login/cadastro são demonstrativos.
 - Não há consulta ao banco de dados ou integração com API.
 - Ações de WhatsApp, telefone, rota, avaliações e cadastro podem ser apenas demonstrativas.
+
+## Documentação de commits
+
+O registro técnico da etapa atual deve ser colocado em `docs/SIMPLES_FICA_Commit_Etapa_4.md`. Nele estão as regras de validação, o inventário de arquivos, os limites das ações demonstrativas e os pontos futuros de integração com a API.
 
 ## Repositório
 
