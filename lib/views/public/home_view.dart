@@ -1,21 +1,63 @@
 
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+
+import '../../data/estabelecimentos_mock.dart';
+import '../../models/estabelecimento.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/business/estabelecimento_card.dart';
+import 'business_detail_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
+
+  Estabelecimento _buscarPorId(int id) {
+    return estabelecimentosMock.firstWhere(
+          (estabelecimento) => estabelecimento.id == id,
+    );
+  }
+
+  void _abrirDetalhes(
+      BuildContext context,
+      Estabelecimento estabelecimento,
+      ) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BusinessDetailView(
+          estabelecimento: estabelecimento,
+        ),
+      ),
+    );
+  }
+
+  Widget _card(
+      BuildContext context,
+      int id, {
+        bool patrocinado = false,
+      }) {
+    final estabelecimento = _buscarPorId(id);
+
+    return EstabelecimentoCard(
+      estabelecimento: estabelecimento,
+      patrocinado: patrocinado,
+      onTap: () {
+        _abrirDetalhes(context, estabelecimento);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
+
       body: SafeArea(
         child: ListView(
           children: [
-            // ESPAÇO DE ANÚNCIO
+            // ANÚNCIOS
             Container(
               color: const Color(0xFFFFF3DC),
               padding: const EdgeInsets.all(20),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -34,9 +76,9 @@ class HomeView extends StatelessWidget {
                   const Text(
                     'Destaques patrocinados',
                     style: TextStyle(
+                      color: AppTheme.brown,
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3D3521),
                     ),
                   ),
 
@@ -45,26 +87,19 @@ class HomeView extends StatelessWidget {
                   const Text(
                     'Anúncios aparecem aqui e não '
                         'alteram a ordem da busca.',
-                    style: TextStyle(
-                      color: Color(0xFF736542),
-                    ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  _cardEstabelecimento(
-                    nome: 'Café da Praça',
-                    descricao: 'Cafeteria e lanches artesanais',
-                    icone: Icons.local_cafe,
+                  _card(
+                    context,
+                    1,
                     patrocinado: true,
                   ),
 
-                  const SizedBox(height: 12),
-
-                  _cardEstabelecimento(
-                    nome: 'Tech Cell',
-                    descricao: 'Assistência técnica e acessórios',
-                    icone: Icons.phone_android,
+                  _card(
+                    context,
+                    2,
                     patrocinado: true,
                   ),
                 ],
@@ -74,6 +109,7 @@ class HomeView extends StatelessWidget {
             // ESTABELECIMENTOS PRÓXIMOS
             Padding(
               padding: const EdgeInsets.all(20),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -101,35 +137,24 @@ class HomeView extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   const Text(
-                    'Explore estabelecimentos e serviços '
-                        'da sua região.',
+                    'Explore estabelecimentos e '
+                        'serviços da sua região.',
                   ),
 
                   const SizedBox(height: 20),
 
-                  _cardEstabelecimento(
-                    nome: 'Mercado Central',
-                    descricao: 'Mercado e produtos alimentícios',
-                    icone: Icons.store,
-                    patrocinado: false,
-                  ),
+                  _card(context, 4),
 
-                  const SizedBox(height: 12),
-
-                  _cardEstabelecimento(
-                    nome: 'Barbearia Moderna',
-                    descricao: 'Cortes masculinos e cuidados',
-                    icone: Icons.content_cut,
-                    patrocinado: false,
-                  ),
+                  _card(context, 3),
                 ],
               ),
             ),
 
-            // CONVITE PARA COMERCIANTES
+            // CONVITE AOS COMERCIANTES
             Container(
               color: const Color(0xFFF4E3D7),
               padding: const EdgeInsets.all(24),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -153,91 +178,26 @@ class HomeView extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Cadastrar negócio'),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Cadastro de negócios será '
+                                'implementado futuramente.',
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Cadastrar negócio',
+                    ),
                   ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _cardEstabelecimento({
-    required String nome,
-    required String descricao,
-    required IconData icone,
-    required bool patrocinado,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: patrocinado
-              ? const Color(0xFFE4C98F)
-              : const Color(0xFFEAD7CC),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: patrocinado
-                  ? const Color(0xFFFFF3DC)
-                  : const Color(0xFFF4E3D7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icone,
-              size: 32,
-              color: AppTheme.primary,
-            ),
-          ),
-
-          const SizedBox(width: 14),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (patrocinado)
-                  const Text(
-                    'ANÚNCIO',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF9A612C),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                Text(
-                  nome,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.brown,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  descricao,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF78645C),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

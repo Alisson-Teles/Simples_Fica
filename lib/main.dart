@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'theme/app_theme.dart';
-import 'views/splash_view.dart';
+import 'views/core/splash_view.dart';
 
 void main() {
   runApp(const SimplesFicaApp());
