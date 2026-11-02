@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../state/app_scope.dart';
 import '../../theme/app_theme.dart';
 
+import '../auth/login_view.dart';
 import 'edit_profile_view.dart';
 
 class ProfileView extends StatelessWidget {
@@ -23,7 +24,9 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Future<void> _editarPerfil(BuildContext context) async {
+  Future<void> _editarPerfil(
+      BuildContext context,
+      ) async {
     final sessao = AppScope.of(context);
 
     final salvo = await Navigator.of(context).push<bool>(
@@ -42,6 +45,15 @@ class ProfileView extends StatelessWidget {
         'Perfil atualizado nesta sessão de teste.',
       );
     }
+  }
+
+  // NAVEGAÇÃO PARA LOGIN
+  void _abrirLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const LoginView(),
+      ),
+    );
   }
 
   Widget _opcao({
@@ -103,7 +115,9 @@ class ProfileView extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 30,
-                    backgroundColor: Color(0xFFF4E3D7),
+                    backgroundColor:
+                    Color(0xFFF4E3D7),
+
                     child: Icon(
                       Icons.person,
                       color: AppTheme.primary,
@@ -154,7 +168,7 @@ class ProfileView extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // MENU DE NAVEGAÇÃO
+          // DADOS PESSOAIS
           _opcao(
             icone: Icons.person_outline,
             titulo: 'Dados pessoais',
@@ -163,24 +177,23 @@ class ProfileView extends StatelessWidget {
             },
           ),
 
+          // FAVORITOS
           _opcao(
             icone: Icons.favorite_border,
             titulo: 'Meus favoritos',
             onTap: onFavoritosPressed,
           ),
 
+          // LOGIN E CADASTRO
           _opcao(
             icone: Icons.login,
             titulo: 'Entrar ou criar conta',
             onTap: () {
-              _mostrarMensagem(
-                context,
-                'Login e cadastro serão implementados '
-                    'na Etapa 4.',
-              );
+              _abrirLogin(context);
             },
           ),
 
+          // PAINEL DO COMERCIANTE
           _opcao(
             icone: Icons.storefront_outlined,
             titulo: 'Meus negócios',
@@ -193,14 +206,15 @@ class ProfileView extends StatelessWidget {
             },
           ),
 
+          // CONFIGURAÇÕES
           _opcao(
             icone: Icons.settings_outlined,
             titulo: 'Configurações',
             onTap: () {
               _mostrarMensagem(
                 context,
-                'Configurações serão implementadas '
-                    'na Etapa 7.',
+                'Configurações serão '
+                    'implementadas na Etapa 7.',
               );
             },
           ),
