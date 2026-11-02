@@ -1,4 +1,4 @@
-package com.example.ponte_dourada
+package com.example.git
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,6 @@
 {
-    "name": "ponte_dourada",
-    "short_name": "ponte_dourada",
+    "name": "git",
+    "short_name": "git",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
